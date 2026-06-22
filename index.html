@@ -246,7 +246,8 @@
       <button class="btn primary" id="btnExport" title="Creează un .zip cu aplicația + folderul cards/ + datele tale">📦 Exportă pachet</button>
       <button class="btn" id="btnImport">⬆ Importă</button>
       <button class="btn" id="btn17l" title="Importă note din win-rate-urile de pe 17Lands">📊 17Lands</button>
-      <button class="btn" id="btnCloud" title="Sincronizează profilele/datele cu Google Drive">☁ Drive</button>
+      <button class="btn good" id="btnSync" title="Sincronizează datele cu fișierul partajat din Google Drive">🔄 Sync</button>
+      <button class="btn" id="btnCloud" title="Setări sincronizare Google Drive">☁ Drive</button>
       <button class="btn ghost" id="btnHelp" title="Cum folosesc offline / mut pe alt calculator">❔ Ajutor</button>
       <button class="btn ghost" id="btnReload" title="Reîncarcă lista de carduri de la Scryfall">↻</button>
       <button class="btn ghost danger" id="btnReset">Reset</button>
@@ -985,14 +986,17 @@
   // ---------- Google Drive sync (privat appdata SAU fișier partajat) ----------
   var GD_CLIENT_KEY="msh-gdrive-client",GD_AUTO_KEY="msh-gdrive-auto",GD_FILE="msh-tierlist.json",
       GD_MODE_KEY="msh-gdrive-mode",GD_SHARED_KEY="msh-gdrive-fileid";
+  // defaults (built in) — utilizatorii nu mai trebuie să le scrie; pot fi suprascrise local
+  var GD_DEF_CLIENT="149711170487-btdv1cqvnb2f9k4pnfal98pf8u13vk5o.apps.googleusercontent.com";
+  var GD_DEF_FILE="1udSgAjAfMLXYToyN8h3JWEJs5LQoJMQZ";
   var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null,gScopeUsed="";
   function lsGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
   function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}
-  function gClientId(){return lsGet(GD_CLIENT_KEY);}
+  function gClientId(){return lsGet(GD_CLIENT_KEY)||GD_DEF_CLIENT;}
   function gSetClientId(v){lsSet(GD_CLIENT_KEY,v);}
-  function gMode(){return lsGet(GD_MODE_KEY)==="shared"?"shared":"appdata";}
-  function gSetMode(v){lsSet(GD_MODE_KEY,v==="shared"?"shared":"");}
-  function gSharedId(){return lsGet(GD_SHARED_KEY);}
+  function gMode(){return lsGet(GD_MODE_KEY)==="appdata"?"appdata":"shared";} // implicit: partajat
+  function gSetMode(v){lsSet(GD_MODE_KEY,v==="appdata"?"appdata":"shared");}
+  function gSharedId(){return lsGet(GD_SHARED_KEY)||GD_DEF_FILE;}
   function gSetSharedId(v){lsSet(GD_SHARED_KEY,(v||"").trim());}
   // shared file needs full Drive access (a file shared by someone else can't be reached via appdata)
   function gScope(){return gMode()==="shared"?"https://www.googleapis.com/auth/drive":"https://www.googleapis.com/auth/drive.appdata";}
@@ -1106,8 +1110,15 @@
     }).catch(function(e){gConnected=false;updateCloudUI();cloudStatus("Eroare: "+(e.message||e),true);});
   }
   function cloudSyncNow(){if(!gConnected)return;cloudStatus("Sincronizez…");
-    drivePull().then(function(r){return drivePush().then(function(){cloudStatus(r.pulled?"Adus din Drive ✓":"Trimis în Drive ✓");});})
-      .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);});}
+    return drivePull().then(function(r){return drivePush().then(function(){
+      cloudStatus(r.pulled?"Adus din Drive ✓":"Trimis în Drive ✓");toast(r.pulled?"Date aduse din Drive":"Date trimise în Drive");});})
+      .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);toast("Sync eșuat: "+(e.message||e));});}
+  // butonul „Sync" din bară: conectează la nevoie, apoi pull+push
+  function cloudSync(){
+    var c=$("#cloud");if(c)c.classList.remove("hidden");updateCloudUI();
+    if(gConnected){toast("Sincronizez…");cloudSyncNow();}
+    else cloudConnect(true);
+  }
   function cloudDisconnect(){var tk=gToken;gConnected=false;gToken=null;gTokenExp=0;
     try{localStorage.removeItem(GD_AUTO_KEY);}catch(e){}
     try{if(tk&&window.google&&google.accounts&&google.accounts.oauth2&&google.accounts.oauth2.revoke)google.accounts.oauth2.revoke(tk);}catch(e){}
@@ -1122,6 +1133,7 @@
   $("#btnHelp").addEventListener("click",function(){var h=$("#help");h.classList.toggle("hidden");
     if(!h.classList.contains("hidden"))h.scrollIntoView({behavior:"smooth",block:"nearest"});});
   $("#btnHelpClose").addEventListener("click",function(){$("#help").classList.add("hidden");});
+  $("#btnSync").addEventListener("click",cloudSync);
   $("#btnCloud").addEventListener("click",function(){var c=$("#cloud");c.classList.toggle("hidden");
     if(!c.classList.contains("hidden")){updateCloudUI();c.scrollIntoView({behavior:"smooth",block:"nearest"});}});
   $("#btnCloudClose").addEventListener("click",function(){$("#cloud").classList.add("hidden");});
@@ -1190,6 +1202,7 @@
       var rl=$("#btnReload");if(rl)rl.classList.add("hidden");
       var l17=$("#btn17l");if(l17)l17.classList.add("hidden");
       var cb=$("#btnCloud");if(cb)cb.classList.add("hidden");
+      var sb2=$("#btnSync");if(sb2)sb2.classList.add("hidden");
       return;
     }
     var had=load();
