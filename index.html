@@ -903,14 +903,14 @@
   var GD_DEF_CLIENT="149711170487-va82183agg4c8hqkkgde2bg8s0n3ga5i.apps.googleusercontent.com";
   var GD_DEF_FILE="1udSgAjAfMLXYToyN8h3JWEJs5LQoJMQZ";
   var GD_DEF_APIKEY="AIzaSyBY6Gsk4yq2YZUC0BWbsvsrs2Ox3kruOKM"; // pentru Google Picker
-  var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null,gScopeUsed="";
+  var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null,gScopeUsed="",gSharedRuntime="";
   function lsGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
   function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}
   function gClientId(){return GD_DEF_CLIENT;} // mereu default (nu mai există UI de schimbat)
   function gSetClientId(v){lsSet(GD_CLIENT_KEY,v);}
   function gMode(){return lsGet(GD_MODE_KEY)==="appdata"?"appdata":"shared";} // implicit: partajat
   function gSetMode(v){lsSet(GD_MODE_KEY,v==="appdata"?"appdata":"shared");}
-  function gSharedId(){return lsGet(GD_SHARED_KEY)||GD_DEF_FILE;}
+  function gSharedId(){return gSharedRuntime||lsGet(GD_SHARED_KEY)||GD_DEF_FILE;}
   function gSetSharedId(v){lsSet(GD_SHARED_KEY,(v||"").trim());}
   // drive.file = acces DOAR la fișierele create/deschise cu această aplicație (acces limitat)
   function gScope(){return gMode()==="shared"?"https://www.googleapis.com/auth/drive.file":"https://www.googleapis.com/auth/drive.appdata";}
@@ -1026,8 +1026,10 @@
           .setCallback(function(data){
             var a=data[google.picker.Response.ACTION];
             if(a===google.picker.Action.PICKED){
-              var id=data[google.picker.Response.DOCUMENTS][0][google.picker.Document.ID];
-              gSetSharedId(id);res(id);}
+              var doc=data[google.picker.Response.DOCUMENTS][0];
+              var id=doc[google.picker.Document.ID],nm=doc[google.picker.Document.NAME]||"";
+              gSharedRuntime=id;gSetSharedId(id);     // fișierul ales devine sursa adevărului
+              toast("Fișier ales: "+nm);res(id);}
             else if(a===google.picker.Action.CANCEL)rej(new Error("Selecție anulată"));
           }).build();
         picker.setVisible(true);
@@ -1065,7 +1067,11 @@
         gConnected=true;try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
         cloudStatus(r.pulled?"Conectat · date aduse din Drive ✓":(r.none?"Conectat · creat fișier nou în Drive ✓":"Conectat · date trimise în Drive ✓"));
         toast("Google Drive conectat");});});
-    }).catch(function(e){gConnected=false;updateCloudUI();cloudStatus("Eroare: "+(e.message||e),true);toast("Drive: "+(e.message||e));});
+    }).catch(function(e){gConnected=false;updateCloudUI();
+      var m=(e&&e.message)||String(e);
+      if(/40[34]/.test(m)&&gMode()==="shared")
+        m="Fișierul partajat nu e accesibil cu acest cont. Verifică: (1) fișierul există în Drive-ul tău, (2) e partajat pe emailul tău (Share → Editor), (3) în Picker ai fost logat cu ACELAȘI cont ca la accept.";
+      cloudStatus(m,true);toast("Drive: "+m);});
   }
   function cloudSyncNow(){if(!gConnected)return;cloudStatus("Sincronizez…");
     return drivePull().then(function(r){return drivePush().then(function(){
