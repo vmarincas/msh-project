@@ -242,15 +242,8 @@
     </div>
     <div class="spacer"></div>
     <div class="actions">
-      <button class="btn" id="btnSaveOffline" title="Descarcă imaginile cardurilor în memoria locală a browserului">💾 Salvează offline</button>
-      <button class="btn primary" id="btnExport" title="Creează un .zip cu aplicația + folderul cards/ + datele tale">📦 Exportă pachet</button>
-      <button class="btn" id="btnImport">⬆ Importă</button>
-      <button class="btn" id="btn17l" title="Importă note din win-rate-urile de pe 17Lands">📊 17Lands</button>
+      <button class="btn" id="btn17l" title="Importă note din 17Lands">📊 17Lands</button>
       <button class="btn good" id="btnSync" title="Sincronizează datele cu fișierul partajat din Google Drive">🔄 Sync</button>
-      <button class="btn" id="btnCloud" title="Setări sincronizare Google Drive">☁ Drive</button>
-      <button class="btn ghost" id="btnHelp" title="Cum folosesc offline / mut pe alt calculator">❔ Ajutor</button>
-      <button class="btn ghost" id="btnReload" title="Reîncarcă lista de carduri de la Scryfall">↻</button>
-      <button class="btn ghost danger" id="btnReset">Reset</button>
     </div>
   </div>
   <div class="toolbar">
@@ -309,84 +302,6 @@
 
 <div class="status" id="status"></div>
 
-<div class="help hidden" id="help">
-  <div class="helppanel">
-    <button class="helpclose" id="btnHelpClose" title="Închide">✕</button>
-    <h3>Cum o folosesc offline și o mut pe alt calculator?</h3>
-    <div class="helpgrid">
-      <div class="helpcard">
-        <div class="hh"><span class="hi">📦</span> Mut pe alt calculator</div>
-        <ol>
-          <li>Apasă <b>📦 Exportă pachet</b> (cu internet, o singură dată). Se descarcă un <b>.zip</b>.</li>
-          <li>Copiază .zip-ul pe celălalt calculator.</li>
-          <li><b>Dezarhivează tot folderul.</b></li>
-          <li>Deschide <b>index.html</b> cu dublu-click.</li>
-        </ol>
-        <p class="hnote">Merge complet offline, cu note + imagini. Ține folderul întreg împreună — imaginile sunt în <code>cards/</code>.</p>
-      </div>
-      <div class="helpcard">
-        <div class="hh"><span class="hi">💾</span> Offline pe acest calculator</div>
-        <ol>
-          <li>Apasă <b>💾 Salvează offline</b> (cu internet, o dată).</li>
-          <li>Apoi poți deschide pagina și fără net; notele se salvează automat.</li>
-        </ol>
-        <p class="hnote">Datele țin de browserul acestui calculator. Pentru ceva portabil, folosește <b>Exportă pachet</b>.</p>
-      </div>
-      <div class="helpcard">
-        <div class="hh"><span class="hi">⬆</span> Aduc notele într-o pagină existentă</div>
-        <ol>
-          <li>Pe celălalt calculator, apasă <b>⬆ Importă</b>.</li>
-          <li>Alege <b>.zip</b>-ul (cu imagini) sau un <b>.json</b> (doar datele).</li>
-        </ol>
-        <p class="hnote">„Exportă doar datele (.json)" e în subsolul paginii.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="help hidden" id="cloud">
-  <div class="helppanel">
-    <button class="helpclose" id="btnCloudClose" title="Închide">✕</button>
-    <h3><span id="cloudDot" class="cdot"></span> Sincronizare Google Drive</h3>
-    <div class="cloudrow">
-      <input class="cinput" id="cloudClient" placeholder="Google OAuth Client ID (…apps.googleusercontent.com)" />
-      <button class="btn" id="btnCloudSaveId">Salvează ID</button>
-    </div>
-    <div class="cloudrow">
-      <label class="plabel" for="cloudMode">Mod:</label>
-      <select class="sel" id="cloudMode">
-        <option value="appdata">Privat (doar contul meu)</option>
-        <option value="shared">Partajat (fișier comun)</option>
-      </select>
-    </div>
-    <div class="cloudrow hidden" id="sharedRow">
-      <input class="cinput" id="cloudFileId" placeholder="File ID al fișierului Drive partajat" />
-      <button class="btn" id="btnCloudNewShared" title="Creează un fișier nou în Drive-ul tău">＋ Fișier nou</button>
-      <button class="btn ghost" id="btnCloudShareLink" title="Permite editarea oricui are ID-ul">🔗 Editabil cu linkul</button>
-    </div>
-    <div class="cloudrow">
-      <button class="btn primary" id="btnCloudConnect">☁ Conectează Drive</button>
-      <button class="btn" id="btnCloudSync" disabled>↻ Sincronizează acum</button>
-      <button class="btn ghost danger hidden" id="btnCloudDisc">Deconectează</button>
-    </div>
-    <div class="cstatus" id="cloudStatus"></div>
-    <details class="cloudhelp">
-      <summary>Cum obțin Client ID-ul (o singură dată)</summary>
-      <ol>
-        <li>Aplicația trebuie deschisă de la o adresă <b>https</b>, nu <code>file://</code>. Cel mai simplu: pune folderul pe <b>GitHub Pages</b> și folosește linkul <code>https://…</code> (aceeași adresă pe toate calculatoarele).</li>
-        <li>Intră pe <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> și creează un proiect.</li>
-        <li>„APIs &amp; Services" → <b>Enable APIs</b> → activează <b>Google Drive API</b>.</li>
-        <li>„OAuth consent screen" → tip <b>External</b> → la <b>Test users</b> adaugă-ți adresa de Gmail.</li>
-        <li>„Credentials" → <b>Create Credentials</b> → <b>OAuth client ID</b> → tip <b>Web application</b>.</li>
-        <li>La <b>Authorized JavaScript origins</b> pune <b>exact</b> adresa de unde deschizi aplicația (ex. <code>https://numele-tau.github.io</code>).</li>
-        <li>Copiază <b>Client ID</b>-ul în câmpul de sus, apasă <b>Salvează ID</b>, apoi <b>Conectează Drive</b>.</li>
-      </ol>
-      <p class="hnote"><b>Mod privat:</b> datele stau într-un folder ascuns al aplicației în Drive-ul tău (scope <code>drive.appdata</code>) — fiecare cont cu ale lui.</p>
-      <p class="hnote"><b>Mod partajat:</b> tu apeși <b>＋ Fișier nou</b> (creează un fișier în Drive-ul tău), apoi <b>🔗 Editabil cu linkul</b> și dai <b>File ID</b>-ul prietenilor. Ei aleg „Partajat", lipesc același File ID și se conectează — toți editează aceleași note (ultima salvare câștigă; apasă <b>Sincronizează acum</b> ca să iei ultimele modificări). Modul partajat cere acces Drive complet la conectare — accepți ecranul Google.</p>
-    </details>
-  </div>
-</div>
-
 <main class="sz-l" id="board">
   <div class="view" id="viewCards">
     <div class="gallery" id="gallery"></div>
@@ -404,8 +319,7 @@
 <footer>
   Datele și imaginile provin de la <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>.
   Marvel Super Heroes™ și Magic: The Gathering™ aparțin deținătorilor de drept. Instrument neoficial, de fani.
-  Datele tale rămân doar pe acest calculator.
-  &nbsp;·&nbsp; <button class="lnk" id="btnExportJson">Exportă doar datele (.json)</button>
+  Datele tale rămân pe acest calculator și (dacă te sincronizezi) în Google Drive-ul tău.
 </footer>
 
 <div class="menu" id="cardMenu">
@@ -418,7 +332,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<input type="file" id="fileInput" accept=".json,.zip,application/json,application/zip" class="hidden" />
 
 <script id="appcode">
 "use strict";
@@ -998,8 +911,8 @@
   function gSetMode(v){lsSet(GD_MODE_KEY,v==="appdata"?"appdata":"shared");}
   function gSharedId(){return lsGet(GD_SHARED_KEY)||GD_DEF_FILE;}
   function gSetSharedId(v){lsSet(GD_SHARED_KEY,(v||"").trim());}
-  // shared file needs full Drive access (a file shared by someone else can't be reached via appdata)
-  function gScope(){return gMode()==="shared"?"https://www.googleapis.com/auth/drive":"https://www.googleapis.com/auth/drive.appdata";}
+  // drive.file = acces DOAR la fișierele create/deschise cu această aplicație (acces limitat)
+  function gScope(){return gMode()==="shared"?"https://www.googleapis.com/auth/drive.file":"https://www.googleapis.com/auth/drive.appdata";}
   function cloudStatus(msg,err){var s=$("#cloudStatus");if(s){s.textContent=msg||"";s.className="cstatus"+(err?" err":"");}}
   function updateCloudUI(){
     var ci=$("#cloudClient");if(ci&&!ci.value)ci.value=gClientId();
@@ -1107,15 +1020,14 @@
         gConnected=true;try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
         cloudStatus(r.pulled?"Conectat · date aduse din Drive ✓":(r.none?"Conectat · creat fișier nou în Drive ✓":"Conectat · date trimise în Drive ✓"));
         toast("Google Drive conectat");});});
-    }).catch(function(e){gConnected=false;updateCloudUI();cloudStatus("Eroare: "+(e.message||e),true);});
+    }).catch(function(e){gConnected=false;updateCloudUI();cloudStatus("Eroare: "+(e.message||e),true);toast("Drive: "+(e.message||e));});
   }
   function cloudSyncNow(){if(!gConnected)return;cloudStatus("Sincronizez…");
     return drivePull().then(function(r){return drivePush().then(function(){
       cloudStatus(r.pulled?"Adus din Drive ✓":"Trimis în Drive ✓");toast(r.pulled?"Date aduse din Drive":"Date trimise în Drive");});})
       .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);toast("Sync eșuat: "+(e.message||e));});}
-  // butonul „Sync" din bară: conectează la nevoie, apoi pull+push
+  // butonul „Sync" din bară: conectează la nevoie, apoi pull+push (fără panou)
   function cloudSync(){
-    var c=$("#cloud");if(c)c.classList.remove("hidden");updateCloudUI();
     if(gConnected){toast("Sincronizez…");cloudSyncNow();}
     else cloudConnect(true);
   }
@@ -1125,34 +1037,8 @@
     updateCloudUI();cloudStatus("Deconectat. Datele locale rămân pe acest calculator.");}
 
   // ---------- controls ----------
-  $("#btnSaveOffline").addEventListener("click",saveOfflineFlow);
-  $("#btnExport").addEventListener("click",exportPackage);
-  $("#btnExportJson").addEventListener("click",exportJson);
-  $("#btnImport").addEventListener("click",function(){elFile.value="";elFile.click();});
   $("#btn17l").addEventListener("click",import17Lands);
-  $("#btnHelp").addEventListener("click",function(){var h=$("#help");h.classList.toggle("hidden");
-    if(!h.classList.contains("hidden"))h.scrollIntoView({behavior:"smooth",block:"nearest"});});
-  $("#btnHelpClose").addEventListener("click",function(){$("#help").classList.add("hidden");});
   $("#btnSync").addEventListener("click",cloudSync);
-  $("#btnCloud").addEventListener("click",function(){var c=$("#cloud");c.classList.toggle("hidden");
-    if(!c.classList.contains("hidden")){updateCloudUI();c.scrollIntoView({behavior:"smooth",block:"nearest"});}});
-  $("#btnCloudClose").addEventListener("click",function(){$("#cloud").classList.add("hidden");});
-  $("#btnCloudSaveId").addEventListener("click",function(){var v=$("#cloudClient").value.trim();gSetClientId(v);
-    cloudStatus(v?"Client ID salvat. Acum apasă „Conectează Drive”.":"Client ID șters.");});
-  $("#cloudMode").addEventListener("change",function(){gSetMode(this.value);gConnected=false;updateCloudUI();
-    cloudStatus(this.value==="shared"?"Mod partajat. Pune un File ID (sau „Fișier nou”), apoi Conectează.":"Mod privat (appdata). Apasă Conectează.");});
-  $("#cloudFileId").addEventListener("change",function(){gSetSharedId(this.value);});
-  $("#btnCloudNewShared").addEventListener("click",cloudCreateShared);
-  $("#btnCloudShareLink").addEventListener("click",cloudMakeLinkEditable);
-  $("#btnCloudConnect").addEventListener("click",function(){cloudConnect(true);});
-  $("#btnCloudSync").addEventListener("click",cloudSyncNow);
-  $("#btnCloudDisc").addEventListener("click",cloudDisconnect);
-  elFile.addEventListener("change",function(){if(elFile.files[0])importFile(elFile.files[0]);});
-  $("#btnReload").addEventListener("click",function(){fetchCards().then(renderAll).catch(loadFailed);});
-  $("#btnReset").addEventListener("click",function(){
-    var p=curProfile();if(!p)return;
-    if(!confirm('Golești toate notele din profilul "'+p.name+'"? Cardurile rămân.'))return;
-    p.grades={};save();refreshViews();toast("Resetat");});
 
   // ---- profiles & tabs ----
   function addProfile(){
