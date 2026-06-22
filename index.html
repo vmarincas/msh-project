@@ -352,6 +352,18 @@
       <button class="btn" id="btnCloudSaveId">Salvează ID</button>
     </div>
     <div class="cloudrow">
+      <label class="plabel" for="cloudMode">Mod:</label>
+      <select class="sel" id="cloudMode">
+        <option value="appdata">Privat (doar contul meu)</option>
+        <option value="shared">Partajat (fișier comun)</option>
+      </select>
+    </div>
+    <div class="cloudrow hidden" id="sharedRow">
+      <input class="cinput" id="cloudFileId" placeholder="File ID al fișierului Drive partajat" />
+      <button class="btn" id="btnCloudNewShared" title="Creează un fișier nou în Drive-ul tău">＋ Fișier nou</button>
+      <button class="btn ghost" id="btnCloudShareLink" title="Permite editarea oricui are ID-ul">🔗 Editabil cu linkul</button>
+    </div>
+    <div class="cloudrow">
       <button class="btn primary" id="btnCloudConnect">☁ Conectează Drive</button>
       <button class="btn" id="btnCloudSync" disabled>↻ Sincronizează acum</button>
       <button class="btn ghost danger hidden" id="btnCloudDisc">Deconectează</button>
@@ -368,7 +380,8 @@
         <li>La <b>Authorized JavaScript origins</b> pune <b>exact</b> adresa de unde deschizi aplicația (ex. <code>https://numele-tau.github.io</code>).</li>
         <li>Copiază <b>Client ID</b>-ul în câmpul de sus, apasă <b>Salvează ID</b>, apoi <b>Conectează Drive</b>.</li>
       </ol>
-      <p class="hnote">Datele se țin într-un folder ascuns al aplicației în Drive-ul tău (scope <code>drive.appdata</code>) — nu-ți umplu Drive-ul și nu vede alte fișiere.</p>
+      <p class="hnote"><b>Mod privat:</b> datele stau într-un folder ascuns al aplicației în Drive-ul tău (scope <code>drive.appdata</code>) — fiecare cont cu ale lui.</p>
+      <p class="hnote"><b>Mod partajat:</b> tu apeși <b>＋ Fișier nou</b> (creează un fișier în Drive-ul tău), apoi <b>🔗 Editabil cu linkul</b> și dai <b>File ID</b>-ul prietenilor. Ei aleg „Partajat", lipesc același File ID și se conectează — toți editează aceleași note (ultima salvare câștigă; apasă <b>Sincronizează acum</b> ca să iei ultimele modificări). Modul partajat cere acces Drive complet la conectare — accepți ecranul Google.</p>
     </details>
   </div>
 </div>
@@ -969,19 +982,49 @@
     importIntoProfile("17Lands · "+fmt,grades,matched,unmatched,"Notele vin din GIH Win Rate (calibrat pe media setului).");
   }
 
-  // ---------- Google Drive sync (drive.appdata) ----------
-  var GD_CLIENT_KEY="msh-gdrive-client",GD_AUTO_KEY="msh-gdrive-auto",GD_FILE="msh-tierlist.json";
-  var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null;
-  function gClientId(){try{return localStorage.getItem(GD_CLIENT_KEY)||"";}catch(e){return "";}}
-  function gSetClientId(v){try{if(v)localStorage.setItem(GD_CLIENT_KEY,v);else localStorage.removeItem(GD_CLIENT_KEY);}catch(e){}}
+  // ---------- Google Drive sync (privat appdata SAU fișier partajat) ----------
+  var GD_CLIENT_KEY="msh-gdrive-client",GD_AUTO_KEY="msh-gdrive-auto",GD_FILE="msh-tierlist.json",
+      GD_MODE_KEY="msh-gdrive-mode",GD_SHARED_KEY="msh-gdrive-fileid";
+  var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null,gScopeUsed="";
+  function lsGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
+  function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}
+  function gClientId(){return lsGet(GD_CLIENT_KEY);}
+  function gSetClientId(v){lsSet(GD_CLIENT_KEY,v);}
+  function gMode(){return lsGet(GD_MODE_KEY)==="shared"?"shared":"appdata";}
+  function gSetMode(v){lsSet(GD_MODE_KEY,v==="shared"?"shared":"");}
+  function gSharedId(){return lsGet(GD_SHARED_KEY);}
+  function gSetSharedId(v){lsSet(GD_SHARED_KEY,(v||"").trim());}
+  // shared file needs full Drive access (a file shared by someone else can't be reached via appdata)
+  function gScope(){return gMode()==="shared"?"https://www.googleapis.com/auth/drive":"https://www.googleapis.com/auth/drive.appdata";}
   function cloudStatus(msg,err){var s=$("#cloudStatus");if(s){s.textContent=msg||"";s.className="cstatus"+(err?" err":"");}}
   function updateCloudUI(){
     var ci=$("#cloudClient");if(ci&&!ci.value)ci.value=gClientId();
+    var md=$("#cloudMode");if(md)md.value=gMode();
+    var sr=$("#sharedRow");if(sr)sr.classList.toggle("hidden",gMode()!=="shared");
+    var fi=$("#cloudFileId");if(fi&&!fi.value)fi.value=gSharedId();
     var c=$("#btnCloudConnect"),d=$("#btnCloudDisc"),sy=$("#btnCloudSync"),dot=$("#cloudDot");
     if(c)c.classList.toggle("hidden",gConnected);
     if(d)d.classList.toggle("hidden",!gConnected);
     if(sy)sy.disabled=!gConnected;
     if(dot)dot.className="cdot"+(gConnected?" on":"");
+  }
+  // create a new shared file in My Drive and store its id (owner step)
+  function cloudCreateShared(){
+    if(!gClientId()){cloudStatus("Întâi pune Client ID-ul Google.",true);return;}
+    gSetMode("shared");updateCloudUI();cloudStatus("Creez fișierul partajat în Drive…");
+    loadGIS().then(function(){return getToken(true);}).then(function(t){return driveCreateShared(t,dataPayload());})
+      .then(function(id){gSetSharedId(id);var fi=$("#cloudFileId");if(fi)fi.value=id;gConnected=true;
+        try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
+        cloudStatus("Fișier creat ✓ File ID: "+id+" — dă-l prietenilor, apoi apasă „Editabil cu linkul” sau partajează-l din Drive.");
+        toast("Fișier partajat creat");})
+      .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);});
+  }
+  function cloudMakeLinkEditable(){
+    var sid=gSharedId();if(!sid){cloudStatus("Întâi pune sau creează un File ID.",true);return;}
+    cloudStatus("Setez permisiunea…");
+    loadGIS().then(function(){return getToken(true);}).then(function(t){return driveMakeLinkEditable(t,sid);})
+      .then(function(){cloudStatus("Gata ✓ Oricine are File ID-ul (și e Test user) îl poate edita.");toast("Permisiune setată");})
+      .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);});
   }
   function loadGIS(){
     if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();
@@ -989,11 +1032,13 @@
       s.onload=function(){res();};s.onerror=function(){rej(new Error("Nu s-a putut încărca Google (offline?)"));};document.head.appendChild(s);});
   }
   function initToken(){
-    if(gTokenClient)return true;
+    var sc=gScope();
+    if(gTokenClient&&gScopeUsed===sc)return true;
     if(!(window.google&&google.accounts&&google.accounts.oauth2))return false;
     var cid=gClientId();if(!cid)return false;
+    gScopeUsed=sc;gToken=null;gTokenExp=0; // scope changed -> force a fresh token
     gTokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,
-      scope:"https://www.googleapis.com/auth/drive.appdata",
+      scope:sc,
       callback:function(resp){
         if(resp&&resp.access_token){gToken=resp.access_token;gTokenExp=Date.now()+((resp.expires_in||3600)*1000)-60000;
           gTokenQueue.forEach(function(q){q.res(gToken);});}
@@ -1023,21 +1068,34 @@
       {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"multipart/related; boundary="+b},body:body}).then(gjson).then(function(d){return d.id;});}
   function driveUpdate(t,id,obj){return fetch("https://www.googleapis.com/upload/drive/v3/files/"+id+"?uploadType=media",
     {method:"PATCH",headers:{Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(obj)}).then(gjson);}
+  // a specific file by id (shared mode) — in My Drive, not appDataFolder
+  function driveCreateShared(t,obj){var b="msh"+Date.now();
+    var body="--"+b+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify({name:"msh-shared-tierlist.json"})+
+      "\r\n--"+b+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify(obj)+"\r\n--"+b+"--";
+    return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+      {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"multipart/related; boundary="+b},body:body}).then(gjson).then(function(d){return d.id;});}
+  function driveMakeLinkEditable(t,id){return fetch("https://www.googleapis.com/drive/v3/files/"+id+"/permissions",
+    {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify({role:"writer",type:"anyone"})}).then(gjson);}
+  function applyRemote(remote){
+    if(remote&&remote.cards&&(remote.updatedAt||0)>(state.updatedAt||0)){
+      applyData(remote);state.updatedAt=remote.updatedAt||state.updatedAt;save(true);renderAll();return {pulled:true};}
+    return {pulled:false};}
   function drivePush(){return getToken(false).then(function(t){var payload=dataPayload();
+    if(gMode()==="shared"){var sid=gSharedId();if(!sid)throw new Error("Lipsește File ID-ul partajat");return driveUpdate(t,sid,payload);}
     if(gFileId)return driveUpdate(t,gFileId,payload);
     return driveFind(t).then(function(f){if(f){gFileId=f.id;return driveUpdate(t,f.id,payload);}
       return driveCreate(t,payload).then(function(id){gFileId=id;});});});}
-  function drivePull(){return getToken(false).then(function(t){return driveFind(t).then(function(f){
-    if(!f)return {none:true};gFileId=f.id;
-    return driveDownload(t,f.id).then(function(remote){
-      if(remote&&remote.cards&&(remote.updatedAt||0)>(state.updatedAt||0)){
-        applyData(remote);state.updatedAt=remote.updatedAt||state.updatedAt;save(true);renderAll();return {pulled:true};}
-      return {pulled:false};});});});}
+  function drivePull(){return getToken(false).then(function(t){
+    if(gMode()==="shared"){var sid=gSharedId();if(!sid)return {none:true};
+      return driveDownload(t,sid).then(applyRemote);}
+    return driveFind(t).then(function(f){if(!f)return {none:true};gFileId=f.id;
+      return driveDownload(t,f.id).then(applyRemote);});});}
   function scheduleCloudPush(){if(!gConnected)return;clearTimeout(gPushTimer);
     gPushTimer=setTimeout(function(){drivePush().then(function(){cloudStatus("Salvat în Drive ✓");})
       .catch(function(e){cloudStatus("Sync eșuat: "+(e.message||e),true);});},1500);}
   function cloudConnect(interactive){
     if(!gClientId()){cloudStatus("Întâi pune Client ID-ul Google (vezi pașii de mai jos).",true);var ci=$("#cloudClient");if(ci)ci.focus();return;}
+    if(gMode()==="shared"&&!gSharedId()){cloudStatus("Mod partajat: pune File ID-ul sau apasă „Fișier nou”.",true);var fi=$("#cloudFileId");if(fi)fi.focus();return;}
     cloudStatus("Conectare la Google Drive…");
     loadGIS().then(function(){return getToken(interactive!==false);}).then(function(){
       cloudStatus("Sincronizez…");
@@ -1069,6 +1127,11 @@
   $("#btnCloudClose").addEventListener("click",function(){$("#cloud").classList.add("hidden");});
   $("#btnCloudSaveId").addEventListener("click",function(){var v=$("#cloudClient").value.trim();gSetClientId(v);
     cloudStatus(v?"Client ID salvat. Acum apasă „Conectează Drive”.":"Client ID șters.");});
+  $("#cloudMode").addEventListener("change",function(){gSetMode(this.value);gConnected=false;updateCloudUI();
+    cloudStatus(this.value==="shared"?"Mod partajat. Pune un File ID (sau „Fișier nou”), apoi Conectează.":"Mod privat (appdata). Apasă Conectează.");});
+  $("#cloudFileId").addEventListener("change",function(){gSetSharedId(this.value);});
+  $("#btnCloudNewShared").addEventListener("click",cloudCreateShared);
+  $("#btnCloudShareLink").addEventListener("click",cloudMakeLinkEditable);
   $("#btnCloudConnect").addEventListener("click",function(){cloudConnect(true);});
   $("#btnCloudSync").addEventListener("click",cloudSyncNow);
   $("#btnCloudDisc").addEventListener("click",cloudDisconnect);
