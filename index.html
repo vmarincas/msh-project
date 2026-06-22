@@ -1068,7 +1068,7 @@
     if(!c.classList.contains("hidden")){updateCloudUI();c.scrollIntoView({behavior:"smooth",block:"nearest"});}});
   $("#btnCloudClose").addEventListener("click",function(){$("#cloud").classList.add("hidden");});
   $("#btnCloudSaveId").addEventListener("click",function(){var v=$("#cloudClient").value.trim();gSetClientId(v);
-    cloudStatus(v?"Client ID salvat. Acum apasă „Conectează Drive".":"Client ID șters.");});
+    cloudStatus(v?"Client ID salvat. Acum apasă „Conectează Drive”.":"Client ID șters.");});
   $("#btnCloudConnect").addEventListener("click",function(){cloudConnect(true);});
   $("#btnCloudSync").addEventListener("click",cloudSyncNow);
   $("#btnCloudDisc").addEventListener("click",cloudDisconnect);
