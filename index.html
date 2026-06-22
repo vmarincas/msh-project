@@ -902,6 +902,7 @@
   // defaults (built in) — utilizatorii nu mai trebuie să le scrie; pot fi suprascrise local
   var GD_DEF_CLIENT="149711170487-btdv1cqvnb2f9k4pnfal98pf8u13vk5o.apps.googleusercontent.com";
   var GD_DEF_FILE="1udSgAjAfMLXYToyN8h3JWEJs5LQoJMQZ";
+  var GD_DEF_APIKEY="AIzaSyC20zBufzLJpLKCIOf4cEEd3ME-LsugQ5Q"; // pentru Google Picker
   var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null,gScopeUsed="";
   function lsGet(k){try{return localStorage.getItem(k)||"";}catch(e){return "";}}
   function lsSet(k,v){try{if(v)localStorage.setItem(k,v);else localStorage.removeItem(k);}catch(e){}}
@@ -997,6 +998,48 @@
     if(remote&&remote.cards&&(remote.updatedAt||0)>(state.updatedAt||0)){
       applyData(remote);state.updatedAt=remote.updatedAt||state.updatedAt;save(true);renderAll();return {pulled:true};}
     return {pulled:false};}
+  // are aplicația deja acces (drive.file) la fișierul partajat?
+  function driveCheck(t,id){if(!id)return Promise.resolve(false);
+    return fetch("https://www.googleapis.com/drive/v3/files/"+id+"?fields=id",{headers:{Authorization:"Bearer "+t}})
+      .then(function(r){return r.ok;}).catch(function(){return false;});}
+  // încarcă Google Picker (gapi)
+  function loadGapiPicker(){
+    return new Promise(function(res,rej){
+      if(window.google&&window.google.picker)return res();
+      function ready(){if(!window.gapi)return rej(new Error("gapi indisponibil"));
+        gapi.load("picker",{callback:function(){res();},onerror:function(){rej(new Error("Picker nu s-a încărcat"));}});}
+      if(window.gapi)return ready();
+      var s=document.createElement("script");s.src="https://apis.google.com/js/api.js";
+      s.onload=ready;s.onerror=function(){rej(new Error("Nu s-a putut încărca Google API"));};document.head.appendChild(s);
+    });
+  }
+  // deschide dialogul „Alege fișierul"; selecția dă aplicației acces drive.file la el
+  function pickFile(token){
+    return loadGapiPicker().then(function(){
+      return new Promise(function(res,rej){
+        var shared=new google.picker.DocsView(google.picker.ViewId.DOCS).setOwnedByMe(false).setMode(google.picker.DocsViewMode.LIST);
+        var mine=new google.picker.DocsView(google.picker.ViewId.DOCS).setMode(google.picker.DocsViewMode.LIST);
+        var picker=new google.picker.PickerBuilder()
+          .setOAuthToken(token).setDeveloperKey(GD_DEF_APIKEY)
+          .setTitle("Alege fișierul partajat (msh-shared-tierlist.json)")
+          .addView(shared).addView(mine)
+          .setCallback(function(data){
+            var a=data[google.picker.Response.ACTION];
+            if(a===google.picker.Action.PICKED){
+              var id=data[google.picker.Response.DOCUMENTS][0][google.picker.Document.ID];
+              gSetSharedId(id);res(id);}
+            else if(a===google.picker.Action.CANCEL)rej(new Error("Selecție anulată"));
+          }).build();
+        picker.setVisible(true);
+      });
+    });
+  }
+  // în mod partajat: dacă n-avem încă acces la fișier, deschide Picker-ul o dată
+  function ensureSharedAccess(t){
+    if(gMode()!=="shared")return Promise.resolve();
+    return driveCheck(t,gSharedId()).then(function(ok){if(ok)return;
+      cloudStatus("Alege fișierul partajat din dialog…");return pickFile(t).then(function(){});});
+  }
   function drivePush(){return getToken(false).then(function(t){var payload=dataPayload();
     if(gMode()==="shared"){var sid=gSharedId();if(!sid)throw new Error("Lipsește File ID-ul partajat");return driveUpdate(t,sid,payload);}
     if(gFileId)return driveUpdate(t,gFileId,payload);
@@ -1014,7 +1057,9 @@
     if(!gClientId()){cloudStatus("Întâi pune Client ID-ul Google (vezi pașii de mai jos).",true);var ci=$("#cloudClient");if(ci)ci.focus();return;}
     if(gMode()==="shared"&&!gSharedId()){cloudStatus("Mod partajat: pune File ID-ul sau apasă „Fișier nou”.",true);var fi=$("#cloudFileId");if(fi)fi.focus();return;}
     cloudStatus("Conectare la Google Drive…");
-    loadGIS().then(function(){return getToken(interactive!==false);}).then(function(){
+    loadGIS().then(function(){return getToken(interactive!==false);}).then(function(t){
+      return ensureSharedAccess(t);
+    }).then(function(){
       cloudStatus("Sincronizez…");
       return drivePull().then(function(r){return drivePush().then(function(){
         gConnected=true;try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
