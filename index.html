@@ -1021,6 +1021,7 @@
         var mine=new google.picker.DocsView(google.picker.ViewId.DOCS).setMode(google.picker.DocsViewMode.LIST);
         var picker=new google.picker.PickerBuilder()
           .setOAuthToken(token).setDeveloperKey(GD_DEF_APIKEY)
+          .setAppId(GD_DEF_CLIENT.split("-")[0]) // numărul proiectului — necesar ca selecția să acorde acces drive.file
           .setTitle("Alege fișierul partajat (msh-shared-tierlist.json)")
           .addView(shared).addView(mine)
           .setCallback(function(data){
