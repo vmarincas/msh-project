@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Marvel Super Heroes — Carduri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --ink:#0E1118; --panel:#171B27; --panel-2:#1F2433; --line:#2C3346;
+    --text:#F1F3F9; --muted:#9AA3B7; --pop:#FFD23F; --kapow:#FF3B47; --energy:#3B82F6;
+    --s:#FF4655; --a:#FF8A3D; --b:#FFC23D; --c:#5FD16A; --d:#4FA8FF; --f:#8A93A6;
+    --radius:10px;
+    --display:'Anton','Arial Narrow','Impact',sans-serif;
+    --body:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(circle at 1px 1px, rgba(255,255,255,.05) 1px, transparent 0) 0 0/16px 16px, var(--ink);
+    color:var(--text);font-family:var(--body);-webkit-font-smoothing:antialiased;min-height:100vh;
+  }
+  a{color:var(--energy)}
+  header{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,#131722,#10141d);
+    border-bottom:3px solid #000;box-shadow:0 4px 0 rgba(0,0,0,.35)}
+  .bar{max-width:1280px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:14px;min-width:0}
+  .burst{flex:0 0 auto;width:52px;height:52px;display:grid;place-items:center;background:var(--kapow);color:#fff;
+    font-family:var(--display);font-size:22px;border:0;text-shadow:1px 1px 0 #000;transform:rotate(-6deg);
+    clip-path:polygon(50% 0,62% 18%,82% 8%,80% 30%,100% 36%,84% 50%,100% 64%,80% 70%,82% 92%,62% 82%,50% 100%,38% 82%,18% 92%,20% 70%,0 64%,16% 50%,0 36%,20% 30%,18% 8%,38% 18%)}
+  .titles{min-width:0}
+  .titles h1{font-family:var(--display);font-weight:400;letter-spacing:.5px;font-size:clamp(20px,3.2vw,30px);
+    line-height:.98;margin:0;text-transform:uppercase}
+  .titles h1 .hl{color:var(--pop)}
+  .titles p{margin:2px 0 0;color:var(--muted);font-size:12.5px;font-weight:500}
+  .spacer{flex:1 1 auto}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  button.btn{font-family:var(--body);font-weight:700;font-size:13px;color:var(--text);background:var(--panel-2);
+    border:2px solid #000;border-radius:8px;padding:9px 13px;cursor:pointer;box-shadow:0 2px 0 #000;
+    transition:transform .05s ease, background .15s;white-space:nowrap}
+  button.btn:hover{background:#2a3145}
+  button.btn:active{transform:translateY(2px);box-shadow:0 0 0 #000}
+  button.btn.primary{background:var(--kapow);color:#fff}
+  button.btn.primary:hover{background:#ff5560}
+  button.btn.good{background:#1d6e36}
+  button.btn.ghost{background:transparent}
+  button.btn.danger:hover{background:#3a1d22;border-color:var(--kapow)}
+  button.btn:disabled{opacity:.5;cursor:default}
+
+  .toolbar{max-width:1280px;margin:0 auto;padding:12px 18px 4px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .search{position:relative;flex:1 1 220px;min-width:180px}
+  .search input{width:100%;padding:10px 12px 10px 36px;border-radius:8px;border:2px solid var(--line);
+    background:var(--panel);color:var(--text);font-size:14px;font-family:var(--body)}
+  .search input:focus{outline:none;border-color:var(--pop)}
+  .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.6}
+  .filtgroup{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .pip{width:30px;height:30px;border-radius:50%;border:2px solid #000;cursor:pointer;display:grid;place-items:center;
+    font-weight:800;font-size:13px;opacity:.45;transition:opacity .12s, transform .08s;user-select:none}
+  .pip.on{opacity:1;transform:scale(1.06)}
+  .pip[data-c="W"]{background:#FBF8E8;color:#5b5536}
+  .pip[data-c="U"]{background:#9BD7F5;color:#0c3a52}
+  .pip[data-c="B"]{background:#3a3a44;color:#cfcfe0}
+  .pip[data-c="R"]{background:#F1A48B;color:#5a1c10}
+  .pip[data-c="G"]{background:#9BD3A0;color:#10401a}
+  .pip[data-c="M"]{background:linear-gradient(135deg,#FFD23F,#FF8A3D);color:#4a2f00}
+  .pip[data-c="C"]{background:#C9C4BC;color:#3a362f}
+  select.sel{padding:9px 10px;border-radius:8px;border:2px solid var(--line);background:var(--panel);
+    color:var(--text);font-family:var(--body);font-size:13px;font-weight:600}
+  .sortwrap{display:flex;align-items:center;gap:6px}
+  .sortwrap label{font-size:12px;font-weight:700;color:var(--muted)}
+  .dir{width:34px;height:34px;border:2px solid var(--line);border-radius:8px;background:var(--panel);
+    color:var(--text);cursor:pointer;font-weight:800;font-size:14px}
+  .sizes{display:flex;border:2px solid var(--line);border-radius:8px;overflow:hidden}
+  .sizes button{background:var(--panel);border:0;color:var(--muted);padding:8px 11px;cursor:pointer;font-weight:700;font-size:12px}
+  .sizes button.on{background:var(--pop);color:#1a1500}
+  .count{margin-left:auto;color:var(--muted);font-size:13px;font-weight:600;white-space:nowrap}
+  .count b{color:var(--text)}
+
+  main{max-width:1280px;margin:0 auto;padding:12px 18px 60px}
+  .gallery{display:flex;flex-wrap:wrap;gap:10px;align-content:flex-start;justify-content:flex-start}
+  .gallery .empty{color:var(--muted);font-size:13px;font-weight:600;opacity:.7;padding:20px}
+  .tier{display:flex;align-items:stretch;margin-bottom:12px;border:3px solid #000;border-radius:var(--radius);
+    overflow:hidden;background:var(--panel);box-shadow:0 3px 0 rgba(0,0,0,.4)}
+  .tier .label{flex:0 0 86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    color:#15120a;cursor:pointer;position:relative;user-select:none;
+    background-image:radial-gradient(circle at 3px 3px, rgba(0,0,0,.14) 1.5px, transparent 0);background-size:10px 10px}
+  .tier .label .lt{font-family:var(--display);font-size:40px;line-height:.8;text-shadow:2px 2px 0 rgba(0,0,0,.18)}
+  .tier .label .ct{font-size:11px;font-weight:800;opacity:.7}
+  .tier .label .edit{position:absolute;top:4px;right:5px;font-size:10px;opacity:0;transition:.15s}
+  .tier .label:hover .edit{opacity:.6}
+  .tier[data-t="S"] .label{background-color:var(--s)}
+  .tier[data-t="A"] .label{background-color:var(--a)}
+  .tier[data-t="B"] .label{background-color:var(--b)}
+  .tier[data-t="C"] .label{background-color:var(--c)}
+  .tier[data-t="D"] .label{background-color:var(--d)}
+  .tier[data-t="F"] .label{background-color:var(--f)}
+  .dropzone{flex:1 1 auto;min-height:120px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;
+    border-left:3px solid #000;transition:background .12s}
+  .dropzone.hot{background:rgba(255,210,63,.12)}
+  .empty{color:var(--muted);font-size:12.5px;font-weight:600;align-self:center;opacity:.65;padding:6px}
+
+  .poolhead{display:flex;align-items:center;gap:10px;margin:22px 0 10px}
+  .poolhead h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0;text-transform:uppercase;letter-spacing:.5px}
+  .poolhead .rule{flex:1;height:3px;background:repeating-linear-gradient(90deg,#000 0 8px,transparent 8px 14px);opacity:.5}
+  .pool{border:3px dashed var(--line);border-radius:var(--radius);padding:10px;display:flex;flex-wrap:wrap;gap:8px;
+    align-content:flex-start;min-height:140px;transition:background .12s}
+  .pool.hot{background:rgba(79,168,255,.10);border-color:var(--d)}
+
+  .card{position:relative;cursor:grab;border-radius:7px;overflow:hidden;border:2px solid #000;background:#0a0c12;
+    line-height:0;box-shadow:0 2px 4px rgba(0,0,0,.5);transition:transform .08s, box-shadow .12s}
+  .card:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 8px 16px rgba(0,0,0,.55);z-index:5}
+  .card:active{cursor:grabbing}
+  .card.dragging{opacity:.4}
+  .card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+  .card .fallback{display:flex;align-items:center;justify-content:center;text-align:center;padding:6px;font-size:11px;
+    font-weight:700;color:var(--text);line-height:1.15;background:linear-gradient(160deg,#222838,#141824);height:100%}
+  .sz-s .card{width:110px;height:154px}
+  .sz-m .card{width:165px;height:230px}
+  .sz-l .card{width:245px;height:342px}
+  .card .pin{position:absolute;top:3px;left:3px;background:rgba(0,0,0,.78);color:#fff;font-size:9px;font-weight:800;
+    padding:2px 5px;border-radius:5px;letter-spacing:.4px}
+  .card .grade{position:absolute;top:3px;right:3px;min-width:20px;height:20px;border-radius:50%;border:2px solid #000;
+    color:#10130c;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 1px 3px rgba(0,0,0,.6);padding:0 2px}
+  .sz-l .card .grade{min-width:26px;height:26px;font-size:14px}
+  .sz-s .card .grade{min-width:17px;height:17px;font-size:9.5px;border-width:1.5px}
+
+  .menu{position:fixed;z-index:60;background:var(--panel-2);border:2px solid #000;border-radius:10px;
+    box-shadow:0 12px 32px rgba(0,0,0,.6);padding:10px;display:none;width:320px;max-width:92vw}
+  .menu.open{display:block}
+  .menu .mtitle{font-size:13px;font-weight:800;color:var(--text);padding:0 2px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .menu .seclbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:6px 2px 5px}
+  .menu .gradelist{display:flex;flex-direction:column;gap:5px}
+  .menu .grow{display:flex;align-items:center;gap:8px}
+  .menu .grow .glabel{flex:0 0 30px;height:30px;display:grid;place-items:center;font-family:var(--display);
+    font-size:18px;color:#15120a;border:2px solid #000;border-radius:7px}
+  .menu .grow .gdesc{flex:1;min-width:0;font-size:11px;font-weight:600;color:var(--muted);line-height:1.12}
+  .menu .grow .gpm{flex:0 0 auto;display:flex;gap:3px}
+  .menu .grow .gpm button{width:30px;height:30px;border:2px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--text);font-weight:800;font-size:13px;cursor:pointer;padding:0}
+  .menu .grow .gpm button:hover{border-color:var(--pop)}
+  .menu .grow .gpm button.act{background:var(--pop);color:#1a1500;border-color:#000}
+  .menu .mS{background:var(--s)}.menu .mA{background:var(--a)}.menu .mB{background:var(--b)}
+  .menu .mC{background:var(--c)}.menu .mD{background:var(--d)}.menu .mE{background:var(--f)}
+  .menu .menurow{display:flex;gap:6px;margin-top:8px}
+  .menu .menurow button{flex:1;background:var(--panel);color:var(--text);border:2px solid var(--line);border-radius:7px;
+    padding:8px 4px;font-weight:700;cursor:pointer;font-size:11.5px}
+  .menu .menurow button:hover{border-color:var(--kapow);color:#fff}
+
+  .status{max-width:1280px;margin:0 auto;padding:0 18px}
+  .banner{border:2px solid var(--line);background:var(--panel);border-radius:10px;padding:14px 16px;margin:8px 0 0;
+    display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .banner.err{border-color:var(--kapow);background:#241318}
+  .banner.ok{border-color:#2fbf4f;background:#13241a}
+  .banner .msg{flex:1;min-width:200px;font-size:13.5px;color:var(--muted)}
+  .banner .msg b{color:var(--text)}
+  .progress{height:8px;background:#0a0c12;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin-top:8px}
+  .progress>div{height:100%;background:linear-gradient(90deg,var(--energy),var(--pop));width:0;transition:width .2s}
+
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(120%);background:#0a0c12;
+    border:2px solid var(--pop);color:var(--text);padding:11px 18px;border-radius:10px;font-weight:700;font-size:13.5px;
+    z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .25s;max-width:90vw;text-align:center}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  footer{max-width:1280px;margin:0 auto;padding:10px 18px 40px;color:var(--muted);font-size:11.5px;line-height:1.6}
+  footer a{color:var(--muted);text-decoration:underline}
+  footer .lnk{background:none;border:0;color:var(--energy);text-decoration:underline;cursor:pointer;font:inherit;padding:0}
+  .help{max-width:1280px;margin:10px auto 0;padding:0 18px}
+  .helppanel{position:relative;border:3px solid #000;border-radius:var(--radius);background:var(--panel);
+    box-shadow:0 3px 0 rgba(0,0,0,.4);padding:16px 46px 16px 18px}
+  .helppanel h3{font-family:var(--display);font-weight:400;text-transform:uppercase;letter-spacing:.5px;
+    margin:0 0 12px;font-size:clamp(17px,2.4vw,21px)}
+  .helpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .helpcard{border:2px solid var(--line);border-radius:9px;background:var(--panel-2);padding:12px 14px}
+  .helpcard .hh{display:flex;align-items:center;gap:8px;font-weight:800;font-size:14px;margin-bottom:8px;color:var(--text)}
+  .helpcard .hi{font-size:18px;line-height:1}
+  .helpcard ol{margin:0;padding-left:18px;font-size:13px;line-height:1.5;color:var(--text)}
+  .helpcard ol li{margin:3px 0}
+  .helpcard ol b{color:var(--pop)}
+  .helpcard .hnote{margin:9px 0 0;font-size:11.5px;color:var(--muted);line-height:1.45}
+  .helpcard code{background:#0a0c12;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11px;font-family:ui-monospace,Consolas,monospace}
+  .helpclose{position:absolute;top:10px;right:10px;width:30px;height:30px;border:2px solid var(--line);
+    border-radius:8px;background:var(--panel);color:var(--text);font-weight:800;font-size:14px;cursor:pointer}
+  .helpclose:hover{border-color:var(--kapow);color:#fff}
+  .cdot{display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--f);margin-right:7px;vertical-align:middle;border:1px solid #000}
+  .cdot.on{background:#2fbf4f}
+  .cloudrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+  .cinput{flex:1 1 320px;min-width:200px;padding:9px 11px;border-radius:8px;border:2px solid var(--line);
+    background:var(--panel);color:var(--text);font-size:13px;font-family:var(--body)}
+  .cinput:focus{outline:none;border-color:var(--pop)}
+  .cstatus{font-size:12.5px;color:var(--muted);min-height:18px;margin:2px 0 10px;font-weight:600}
+  .cstatus.err{color:var(--kapow)}
+  .cloudhelp{border-top:1px solid var(--line);padding-top:8px}
+  .cloudhelp summary{cursor:pointer;font-weight:700;font-size:12.5px;color:var(--energy)}
+  .cloudhelp ol{font-size:12px;line-height:1.55;color:var(--muted);margin:8px 0 0;padding-left:18px}
+  .cloudhelp li{margin:4px 0}
+  .cloudhelp code{background:#0a0c12;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:11px;font-family:ui-monospace,Consolas,monospace}
+
+  .subbar{max-width:1280px;margin:0 auto;padding:4px 18px 12px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .tabs{display:flex;border:2px solid #000;border-radius:9px;overflow:hidden;box-shadow:0 2px 0 #000}
+  .tab{font-family:var(--body);font-weight:800;font-size:13px;color:var(--muted);background:var(--panel-2);
+    border:0;padding:9px 16px;cursor:pointer;white-space:nowrap}
+  .tab:hover{background:#2a3145;color:var(--text)}
+  .tab.on{background:var(--pop);color:#1a1500}
+  .profiles{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .profiles .plabel{font-size:12px;font-weight:700;color:var(--muted)}
+  .pbtn{padding:8px 11px;font-size:14px;line-height:1}
+  .view.hidden{display:none!important}
+  .cmpwrap{overflow-x:auto;border:3px solid #000;border-radius:var(--radius);box-shadow:0 3px 0 rgba(0,0,0,.4)}
+  table.cmp{border-collapse:collapse;width:100%;background:var(--panel)}
+  table.cmp th,table.cmp td{border-bottom:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:middle}
+  table.cmp thead th{position:sticky;top:0;background:var(--panel-2);font-size:11px;text-transform:uppercase;
+    letter-spacing:.4px;color:var(--muted);font-weight:800;z-index:1}
+  table.cmp thead th.pcol{text-align:center}
+  table.cmp tbody tr{cursor:pointer}
+  table.cmp tbody tr:hover{background:rgba(255,255,255,.04)}
+  .cmpcard{display:flex;align-items:center;gap:10px;min-width:200px}
+  .cmpcard img{width:38px;height:53px;object-fit:cover;border-radius:4px;border:1px solid #000;background:#0a0c12;flex:0 0 auto}
+  .cmpcard .cn{font-weight:700;font-size:13px;color:var(--text);line-height:1.15}
+  .cmpcard .cnum{font-size:11px;color:var(--muted);font-weight:600}
+  td.pcell{text-align:center}
+  .cbadge{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:24px;padding:0 6px;
+    border-radius:6px;border:2px solid #000;color:#10130c;font-weight:800;font-size:13px}
+  .cdash{color:var(--muted);opacity:.4;font-weight:700}
+  table.cmp .active-col{background:rgba(255,210,63,.07)}
+  .hidden{display:none!important}
+  @media (max-width:560px){.tier .label{flex:0 0 64px}.tier .label .lt{font-size:30px}.count{width:100%;margin-left:0}}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <div class="burst">MSH</div>
+      <div class="titles">
+        <h1>Marvel Super Heroes <span class="hl">Carduri</span></h1>
+        <p>Set MTG · cod <b style="color:var(--text)">MSH</b> · date de la Scryfall</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button class="btn" id="btnSaveOffline" title="Descarcă imaginile cardurilor în memoria locală a browserului">💾 Salvează offline</button>
+      <button class="btn primary" id="btnExport" title="Creează un .zip cu aplicația + folderul cards/ + datele tale">📦 Exportă pachet</button>
+      <button class="btn" id="btnImport">⬆ Importă</button>
+      <button class="btn" id="btn17l" title="Importă note din win-rate-urile de pe 17Lands">📊 17Lands</button>
+      <button class="btn" id="btnCloud" title="Sincronizează profilele/datele cu Google Drive">☁ Drive</button>
+      <button class="btn ghost" id="btnHelp" title="Cum folosesc offline / mut pe alt calculator">❔ Ajutor</button>
+      <button class="btn ghost" id="btnReload" title="Reîncarcă lista de carduri de la Scryfall">↻</button>
+      <button class="btn ghost danger" id="btnReset">Reset</button>
+    </div>
+  </div>
+  <div class="toolbar">
+    <label class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="Caută după nume…" />
+    </label>
+    <div class="filtgroup" id="colorFilters">
+      <div class="pip" data-c="W" title="Alb">W</div>
+      <div class="pip" data-c="U" title="Albastru">U</div>
+      <div class="pip" data-c="B" title="Negru">B</div>
+      <div class="pip" data-c="R" title="Roșu">R</div>
+      <div class="pip" data-c="G" title="Verde">G</div>
+      <div class="pip" data-c="M" title="Multicolor">M</div>
+      <div class="pip" data-c="C" title="Incolor">C</div>
+    </div>
+    <select class="sel" id="rarity">
+      <option value="">Toate raritățile</option>
+      <option value="common">Common</option>
+      <option value="uncommon">Uncommon</option>
+      <option value="rare">Rare</option>
+      <option value="mythic">Mythic</option>
+    </select>
+    <div class="sortwrap">
+      <label for="sort">Sortează</label>
+      <select class="sel" id="sort">
+        <option value="num">Nr. din set</option>
+        <option value="rarity">Raritate</option>
+        <option value="grade">Notă</option>
+        <option value="name">Nume</option>
+        <option value="cmc">Cost mana</option>
+      </select>
+      <button class="dir" id="dir" title="Crescător / descrescător">↑</button>
+    </div>
+    <div class="sizes" id="sizes">
+      <button data-s="s">S</button>
+      <button data-s="m">M</button>
+      <button data-s="l" class="on">L</button>
+    </div>
+    <div class="count" id="count">0 carduri</div>
+  </div>
+  <div class="subbar">
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-view="cards">🂠 Carduri</button>
+      <button class="tab" data-view="compare">⚖ Comparație</button>
+    </div>
+    <div class="profiles" id="profilesBar">
+      <span class="plabel">Profil:</span>
+      <select class="sel" id="profileSel"></select>
+      <button class="btn ghost pbtn" id="btnProfAdd" title="Profil nou">＋</button>
+      <button class="btn ghost pbtn" id="btnProfRename" title="Redenumește profilul">✎</button>
+      <button class="btn ghost pbtn danger" id="btnProfDel" title="Șterge profilul">🗑</button>
+    </div>
+  </div>
+</header>
+
+<div class="status" id="status"></div>
+
+<div class="help hidden" id="help">
+  <div class="helppanel">
+    <button class="helpclose" id="btnHelpClose" title="Închide">✕</button>
+    <h3>Cum o folosesc offline și o mut pe alt calculator?</h3>
+    <div class="helpgrid">
+      <div class="helpcard">
+        <div class="hh"><span class="hi">📦</span> Mut pe alt calculator</div>
+        <ol>
+          <li>Apasă <b>📦 Exportă pachet</b> (cu internet, o singură dată). Se descarcă un <b>.zip</b>.</li>
+          <li>Copiază .zip-ul pe celălalt calculator.</li>
+          <li><b>Dezarhivează tot folderul.</b></li>
+          <li>Deschide <b>index.html</b> cu dublu-click.</li>
+        </ol>
+        <p class="hnote">Merge complet offline, cu note + imagini. Ține folderul întreg împreună — imaginile sunt în <code>cards/</code>.</p>
+      </div>
+      <div class="helpcard">
+        <div class="hh"><span class="hi">💾</span> Offline pe acest calculator</div>
+        <ol>
+          <li>Apasă <b>💾 Salvează offline</b> (cu internet, o dată).</li>
+          <li>Apoi poți deschide pagina și fără net; notele se salvează automat.</li>
+        </ol>
+        <p class="hnote">Datele țin de browserul acestui calculator. Pentru ceva portabil, folosește <b>Exportă pachet</b>.</p>
+      </div>
+      <div class="helpcard">
+        <div class="hh"><span class="hi">⬆</span> Aduc notele într-o pagină existentă</div>
+        <ol>
+          <li>Pe celălalt calculator, apasă <b>⬆ Importă</b>.</li>
+          <li>Alege <b>.zip</b>-ul (cu imagini) sau un <b>.json</b> (doar datele).</li>
+        </ol>
+        <p class="hnote">„Exportă doar datele (.json)" e în subsolul paginii.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="help hidden" id="cloud">
+  <div class="helppanel">
+    <button class="helpclose" id="btnCloudClose" title="Închide">✕</button>
+    <h3><span id="cloudDot" class="cdot"></span> Sincronizare Google Drive</h3>
+    <div class="cloudrow">
+      <input class="cinput" id="cloudClient" placeholder="Google OAuth Client ID (…apps.googleusercontent.com)" />
+      <button class="btn" id="btnCloudSaveId">Salvează ID</button>
+    </div>
+    <div class="cloudrow">
+      <button class="btn primary" id="btnCloudConnect">☁ Conectează Drive</button>
+      <button class="btn" id="btnCloudSync" disabled>↻ Sincronizează acum</button>
+      <button class="btn ghost danger hidden" id="btnCloudDisc">Deconectează</button>
+    </div>
+    <div class="cstatus" id="cloudStatus"></div>
+    <details class="cloudhelp">
+      <summary>Cum obțin Client ID-ul (o singură dată)</summary>
+      <ol>
+        <li>Aplicația trebuie deschisă de la o adresă <b>https</b>, nu <code>file://</code>. Cel mai simplu: pune folderul pe <b>GitHub Pages</b> și folosește linkul <code>https://…</code> (aceeași adresă pe toate calculatoarele).</li>
+        <li>Intră pe <a href="https://console.cloud.google.com" target="_blank" rel="noopener">console.cloud.google.com</a> și creează un proiect.</li>
+        <li>„APIs &amp; Services" → <b>Enable APIs</b> → activează <b>Google Drive API</b>.</li>
+        <li>„OAuth consent screen" → tip <b>External</b> → la <b>Test users</b> adaugă-ți adresa de Gmail.</li>
+        <li>„Credentials" → <b>Create Credentials</b> → <b>OAuth client ID</b> → tip <b>Web application</b>.</li>
+        <li>La <b>Authorized JavaScript origins</b> pune <b>exact</b> adresa de unde deschizi aplicația (ex. <code>https://numele-tau.github.io</code>).</li>
+        <li>Copiază <b>Client ID</b>-ul în câmpul de sus, apasă <b>Salvează ID</b>, apoi <b>Conectează Drive</b>.</li>
+      </ol>
+      <p class="hnote">Datele se țin într-un folder ascuns al aplicației în Drive-ul tău (scope <code>drive.appdata</code>) — nu-ți umplu Drive-ul și nu vede alte fișiere.</p>
+    </details>
+  </div>
+</div>
+
+<main class="sz-l" id="board">
+  <div class="view" id="viewCards">
+    <div class="gallery" id="gallery"></div>
+  </div>
+  <div class="view hidden" id="viewCompare">
+    <div class="cmpwrap">
+      <table class="cmp" id="cmpTable">
+        <thead id="cmpHead"></thead>
+        <tbody id="cmpBody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Datele și imaginile provin de la <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>.
+  Marvel Super Heroes™ și Magic: The Gathering™ aparțin deținătorilor de drept. Instrument neoficial, de fani.
+  Datele tale rămân doar pe acest calculator.
+  &nbsp;·&nbsp; <button class="lnk" id="btnExportJson">Exportă doar datele (.json)</button>
+</footer>
+
+<div class="menu" id="cardMenu">
+  <div class="mtitle" id="menuTitle"></div>
+  <div class="seclbl">Notă</div>
+  <div class="gradelist" id="gradeBtns"></div>
+  <div class="menurow">
+    <button data-act="ungrade">✕ Șterge nota</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="fileInput" accept=".json,.zip,application/json,application/zip" class="hidden" />
+
+<script id="appcode">
+"use strict";
+(function(){
+  var SET="msh", STORE_KEY="msh-tierlist-v2";
+  var RAR={mythic:4,rare:3,uncommon:2,common:1};
+  // letter-tier grading system (each with -/+ variants)
+  var GRADES=[
+    {l:"S",d:"Dacă castezi cartea, câștigi meciul"},
+    {l:"A",d:"Bombă — poate câștiga sau întoarce meciul"},
+    {l:"B",d:"Carte premium"},
+    {l:"C",d:"Playable"},
+    {l:"D",d:"Filler"},
+    {l:"E",d:"Not playable"}
+  ];
+  var GRADE_COLOR={S:"var(--s)",A:"var(--a)",B:"var(--b)",C:"var(--c)",D:"var(--d)",E:"var(--f)"};
+  // best -> worst, for sorting by grade
+  var GRADE_ORDER=["S+","S","S-","A+","A","A-","B+","B","B-","C+","C","C-","D+","D","D-","E+","E","E-"];
+  function gradeRank(g){var i=GRADE_ORDER.indexOf(g);return i<0?0:(GRADE_ORDER.length-i);}
+  function isValidGrade(g){return GRADE_ORDER.indexOf(g)>=0;}
+
+  // ---------- profiles ----------
+  // Each profile has its own grades; the card catalog (state.cards) is shared.
+  function newPid(){return "p"+Date.now().toString(36)+Math.floor(Math.random()*1e4);}
+  // Make sure state has at least one profile; migrate legacy single-grade data into one.
+  function ensureProfiles(){
+    if(!state.profiles||typeof state.profiles!=="object"||!Object.keys(state.profiles).length){
+      var pid="p1";state.profiles={};
+      state.profiles[pid]={id:pid,name:"Profil 1",
+        grades:(state.grades&&typeof state.grades==="object")?state.grades:{}};
+      state.activeProfile=pid;
+    }
+    if(!state.activeProfile||!state.profiles[state.activeProfile])
+      state.activeProfile=Object.keys(state.profiles)[0];
+    Object.keys(state.profiles).forEach(function(pid){
+      var p=state.profiles[pid];if(!p.grades)p.grades={};if(!p.name)p.name=pid;p.id=pid;
+      Object.keys(p.grades).forEach(function(id){if(!isValidGrade(p.grades[id]))delete p.grades[id];});
+    });
+    delete state.grades;delete state.placements;delete state.tiers; // migrated / unused
+    state.version=3;
+  }
+  function curProfile(){return state.profiles[state.activeProfile];}
+  function gAct(id){var p=curProfile();return p&&p.grades?p.grades[id]:undefined;}
+  function gSet(id,g){var p=curProfile();if(!p)return;if(g)p.grades[id]=g;else delete p.grades[id];}
+
+  var PACKAGED = (typeof window!=="undefined" && window.__PACKAGED_DATA__) ? window.__PACKAGED_DATA__ : null;
+  var IMG_BASE = PACKAGED && PACKAGED.imgBase ? PACKAGED.imgBase : "";
+
+  var state={version:3,set:SET,cards:{},profiles:{},activeProfile:"",updatedAt:0};
+  var order=[];
+  var ui={size:"l",colors:{},rarity:"",q:"",sort:"num",dir:1,view:"cards"};
+
+  // in-memory image stores
+  var imgURL={};   // id -> object URL (from local cache)
+  var imgBlobs={}; // id -> Blob
+
+  // ---------- storage ----------
+  function canStore(){try{localStorage.setItem("__t","1");localStorage.removeItem("__t");return true;}catch(e){return false;}}
+  var STORAGE_OK=canStore();
+  function save(keep){if(!keep)state.updatedAt=Date.now();
+    try{if(STORAGE_OK)localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){}
+    scheduleCloudPush();}
+  function load(){
+    if(!STORAGE_OK)return false;
+    try{var raw=localStorage.getItem(STORE_KEY);if(!raw)return false;var o=JSON.parse(raw);
+      if(o&&o.cards){state=Object.assign(state,o);
+        ensureProfiles();
+        rebuildOrder();return Object.keys(state.cards).length>0;}}catch(e){}
+    return false;
+  }
+  function rebuildOrder(){order=Object.keys(state.cards);}
+
+  // ---------- IndexedDB image cache ----------
+  var IDB_OK=(typeof indexedDB!=="undefined");
+  function idbOpen(){return new Promise(function(res,rej){
+    if(!IDB_OK)return rej(new Error("no idb"));
+    var r=indexedDB.open("msh-tl-img",1);
+    r.onupgradeneeded=function(){r.result.createObjectStore("images");};
+    r.onsuccess=function(){res(r.result);};r.onerror=function(){rej(r.error);};});}
+  function idbPut(db,k,v){return new Promise(function(res,rej){var t=db.transaction("images","readwrite");
+    t.objectStore("images").put(v,k);t.oncomplete=function(){res();};t.onerror=function(){rej(t.error);};});}
+  function idbAll(db){return new Promise(function(res,rej){var t=db.transaction("images","readonly");
+    var out={},c=t.objectStore("images").openCursor();c.onsuccess=function(e){var cur=e.target.result;
+      if(cur){out[cur.key]=cur.value;cur.continue();}else res(out);};c.onerror=function(){rej(c.error);};});}
+  function idbClear(db){return new Promise(function(res,rej){var t=db.transaction("images","readwrite");
+    t.objectStore("images").clear();t.oncomplete=function(){res();};t.onerror=function(){rej(t.error);};});}
+
+  function adoptBlob(id,blob){imgBlobs[id]=blob;try{imgURL[id]=URL.createObjectURL(blob);}catch(e){}}
+  function loadCachedImages(){
+    if(!IDB_OK)return Promise.resolve();
+    return idbOpen().then(function(db){return idbAll(db).then(function(all){
+      Object.keys(all).forEach(function(id){adoptBlob(id,all[id]);});});}).catch(function(){});
+  }
+
+  // ---------- elements ----------
+  var $=function(s){return document.querySelector(s);};
+  var elGallery=$("#gallery"),elBoard=$("#board"),elStatus=$("#status"),
+      elCount=$("#count"),elMenu=$("#cardMenu"),elMenuTitle=$("#menuTitle"),
+      elToast=$("#toast"),elFile=$("#fileInput"),elSearch=$("#search"),elRarity=$("#rarity"),
+      elSort=$("#sort"),elDir=$("#dir"),elGradeBtns=$("#gradeBtns");
+
+  var toastTimer=null;
+  function toast(m){elToast.textContent=m;elToast.classList.add("show");clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){elToast.classList.remove("show");},2400);}
+  function showStatus(h){elStatus.innerHTML=h;}
+  function clearStatus(){elStatus.innerHTML="";}
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+  // ---------- Scryfall ----------
+  function fetchCards(){
+    var url="https://api.scryfall.com/cards/search?q="+
+      encodeURIComponent("set:"+SET+" -t:basic -is:digital -t:token")+"&unique=cards&order=set";
+    var collected={},count=0,total=0,n=0;
+    showStatus('<div class="banner"><div class="msg"><b>Se încarcă lista de carduri</b> de la Scryfall…</div>'+
+      '<div style="width:100%"><div class="progress"><div id="pbar"></div></div></div></div>');
+    function step(u){
+      return fetch(u,{headers:{"Accept":"application/json"}}).then(function(r){
+        if(!r.ok)throw new Error("HTTP "+r.status);return r.json();}).then(function(data){
+        if(data.object==="error")throw new Error(data.details||"eroare Scryfall");
+        total=data.total_cards||total;
+        (data.data||[]).forEach(function(c){var card=normalize(c);if(card&&!collected[card.id]){collected[card.id]=card;count++;}});
+        var pct=total?Math.min(100,Math.round(count/total*100)):50;
+        var pb=document.getElementById("pbar");if(pb)pb.style.width=pct+"%";
+        if(data.has_more&&data.next_page&&n<12){n++;return new Promise(function(res){setTimeout(res,90);}).then(function(){return step(data.next_page);});}
+      });
+    }
+    return step(url).then(function(){
+      if(count===0)throw new Error("0 carduri");
+      state.cards=collected;rebuildOrder();save();clearStatus();toast(count+" carduri încărcate");
+    });
+  }
+  function normalize(c){
+    if(!c||!c.id)return null;var img="";
+    if(c.image_uris&&c.image_uris.normal)img=c.image_uris.normal;
+    else if(c.card_faces&&c.card_faces[0]&&c.card_faces[0].image_uris)img=c.card_faces[0].image_uris.normal||"";
+    var colors=c.colors;
+    if((!colors||!colors.length)&&c.card_faces){colors=[];c.card_faces.forEach(function(f){(f.colors||[]).forEach(function(x){if(colors.indexOf(x)<0)colors.push(x);});});}
+    return {id:c.id,name:c.name||"Fără nume",img:img,colors:colors||[],rarity:c.rarity||"",
+      type:c.type_line||"",cmc:c.cmc||0,num:parseInt((c.collector_number||"").replace(/\D/g,""),10)||0};
+  }
+  function loadFailed(){
+    clearStatus();
+    showStatus('<div class="banner err"><div class="msg"><b>Nu am putut contacta Scryfall.</b> '+
+      'Descarcă acest fișier și deschide-l direct în browser (dublu-click), apoi reîncearcă. '+
+      'Ai nevoie de internet doar prima dată.</div><button class="btn primary" id="retry">↻ Reîncearcă</button></div>');
+    var rb=document.getElementById("retry");
+    if(rb)rb.addEventListener("click",function(){clearStatus();fetchCards().then(renderAll).catch(loadFailed);});
+  }
+
+  // ---------- image source ----------
+  function imgSrcFor(card){
+    if(IMG_BASE)return IMG_BASE+card.id+".jpg";
+    if(imgURL[card.id])return imgURL[card.id];
+    return card.img||"";
+  }
+
+  // ---------- save images offline (IndexedDB) ----------
+  function wait(ms){return new Promise(function(res){setTimeout(res,ms);});}
+  // fetch a single image with retries + backoff (Scryfall rate-limits ~10 req/s)
+  function fetchImageBlob(url,tries){
+    return fetch(url,{mode:"cors",cache:"reload"}).then(function(r){
+      if(r.status===429||r.status>=500)throw new Error("retry "+r.status);
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      return r.blob();
+    }).catch(function(e){
+      if(tries>0)return wait(600).then(function(){return fetchImageBlob(url,tries-1);});
+      throw e;
+    });
+  }
+  function ensureImagesCached(onProg){
+    if(IMG_BASE)return Promise.resolve({ok:0,fail:0}); // packaged: already local files
+    if(!IDB_OK)return Promise.reject(new Error("Acest browser nu permite stocarea locală a imaginilor."));
+    var ids=order.filter(function(id){return state.cards[id]&&state.cards[id].img&&!imgBlobs[id];});
+    var done=0,ok=0,fail=0,totalNeeded=ids.length;
+    if(onProg)onProg(0,totalNeeded);
+    return idbOpen().then(function(db){
+      function next(i){
+        if(i>=ids.length)return Promise.resolve();
+        var id=ids[i],card=state.cards[id];
+        return fetchImageBlob(card.img,3)
+          .then(function(blob){adoptBlob(id,blob);return idbPut(db,id,blob);})
+          .then(function(){ok++;}).catch(function(){fail++;})
+          .then(function(){done++;if(onProg)onProg(done,totalNeeded);
+            return wait(80).then(function(){return next(i+1);});});
+      }
+      return next(0);
+    }).then(function(){return {ok:ok,fail:fail,already:order.length-totalNeeded};});
+  }
+
+  function saveOfflineFlow(){
+    var btn=$("#btnSaveOffline");btn.disabled=true;
+    showStatus('<div class="banner"><div class="msg"><b>Salvez cardurile offline…</b> <span id="soN"></span></div>'+
+      '<div style="width:100%"><div class="progress"><div id="pbar"></div></div></div></div>');
+    ensureImagesCached(function(d,t){
+      var pb=document.getElementById("pbar");if(pb)pb.style.width=(t?Math.round(d/t*100):100)+"%";
+      var s=document.getElementById("soN");if(s)s.textContent=d+" / "+t;
+    }).then(function(res){
+      clearStatus();btn.disabled=false;btn.classList.add("good");btn.textContent="✓ Salvat offline";
+      var msg=res.ok+" imagini salvate";if(res.fail)msg+=" · "+res.fail+" eșuate";
+      showStatus('<div class="banner ok"><div class="msg"><b>Gata.</b> '+msg+'. Acum aplicația merge și fără internet pe acest calculator. '+
+        'Pentru a o muta pe alt calculator, folosește <b>Exportă pachet</b>.</div></div>');
+      toast(msg);renderCards();
+    }).catch(function(err){
+      clearStatus();btn.disabled=false;
+      showStatus('<div class="banner err"><div class="msg"><b>Nu am putut salva imaginile.</b> '+escapeHtml(err.message||"")+
+        ' Verifică internetul și încearcă din nou.</div></div>');
+    });
+  }
+
+  // ---------- filtering & sorting ----------
+  function matches(card){
+    if(ui.q&&card.name.toLowerCase().indexOf(ui.q)<0)return false;
+    if(ui.rarity&&card.rarity!==ui.rarity)return false;
+    var active=Object.keys(ui.colors).filter(function(k){return ui.colors[k];});
+    if(active.length){var cl=card.colors||[],ok=false;
+      active.forEach(function(f){if(f==="C"){if(cl.length===0)ok=true;}
+        else if(f==="M"){if(cl.length>=2)ok=true;}else{if(cl.indexOf(f)>=0)ok=true;}});
+      if(!ok)return false;}
+    return true;
+  }
+  function cmp(a,b){
+    var ca=state.cards[a],cb=state.cards[b],r=0;
+    if(ui.sort==="rarity")r=(RAR[ca.rarity]||0)-(RAR[cb.rarity]||0);
+    else if(ui.sort==="grade")r=gradeRank(gAct(a))-gradeRank(gAct(b));
+    else if(ui.sort==="name")r=ca.name.localeCompare(cb.name);
+    else if(ui.sort==="cmc")r=(ca.cmc||0)-(cb.cmc||0);
+    else r=(ca.num||0)-(cb.num||0);
+    if(r===0)r=(ca.num||0)-(cb.num||0);
+    return r*ui.dir;
+  }
+
+  // ---------- card element ----------
+  function gradeColor(g){return GRADE_COLOR[String(g).charAt(0)]||"var(--f)";}
+  function cardEl(card){
+    var d=document.createElement("div");d.className="card";
+    d.dataset.id=card.id;d.title=card.name;
+    var src=imgSrcFor(card);
+    if(src){var img=document.createElement("img");
+      // load remote images as CORS so a later fetch() can reuse the cache entry (offline save / export)
+      if(/^https?:/i.test(src))img.crossOrigin="anonymous";
+      img.src=src;img.alt=card.name;img.loading="lazy";
+      img.addEventListener("error",function(){d.querySelector("img").remove();
+        var fb=document.createElement("div");fb.className="fallback";fb.textContent=card.name;d.insertBefore(fb,d.firstChild);});
+      d.appendChild(img);
+    } else {var fb=document.createElement("div");fb.className="fallback";fb.textContent=card.name;d.appendChild(fb);}
+    var g=gAct(card.id);
+    if(g){var gb=document.createElement("div");gb.className="grade";gb.textContent=g;gb.style.background=gradeColor(g);d.appendChild(gb);}
+    d.addEventListener("click",function(e){e.stopPropagation();openMenu(card,d);});
+    return d;
+  }
+
+  // ---------- render ----------
+  function renderCards(){
+    elGallery.innerHTML="";
+    var shown=0,graded=0;
+    var sorted=order.slice().sort(cmp);
+    sorted.forEach(function(id){
+      var card=state.cards[id];if(!card)return;
+      if(gAct(id))graded++;
+      if(!matches(card))return;
+      elGallery.appendChild(cardEl(card));shown++;
+    });
+    if(!shown){var e=document.createElement("span");e.className="empty";
+      e.textContent=order.length?"Niciun card nu se potrivește filtrelor.":"Nu sunt carduri încărcate.";elGallery.appendChild(e);}
+    elCount.innerHTML="<b>"+shown+"</b> afișate · "+graded+" notate";
+  }
+
+  // populate the profile <select>
+  function renderProfiles(){
+    var sel=$("#profileSel");if(!sel)return;sel.innerHTML="";
+    Object.keys(state.profiles).forEach(function(pid){
+      var o=document.createElement("option");o.value=pid;o.textContent=state.profiles[pid].name;
+      if(pid===state.activeProfile)o.selected=true;sel.appendChild(o);
+    });
+    var del=$("#btnProfDel");if(del)del.disabled=Object.keys(state.profiles).length<=1;
+  }
+
+  // comparison table: one row per card, one column per profile
+  function thumb(card){var src=imgSrcFor(card);if(!src)return null;
+    var im=document.createElement("img");if(/^https?:/i.test(src))im.crossOrigin="anonymous";
+    im.src=src;im.loading="lazy";im.alt=card.name;return im;}
+  function renderCompare(){
+    var head=$("#cmpHead"),body=$("#cmpBody");if(!head||!body)return;
+    var pids=Object.keys(state.profiles);
+    var htr=document.createElement("tr");
+    var th0=document.createElement("th");th0.textContent="Card";htr.appendChild(th0);
+    pids.forEach(function(pid){var th=document.createElement("th");
+      th.className="pcol"+(pid===state.activeProfile?" active-col":"");
+      th.textContent=state.profiles[pid].name;htr.appendChild(th);});
+    head.innerHTML="";head.appendChild(htr);
+    body.innerHTML="";
+    var sorted=order.slice().sort(cmp),shown=0;
+    sorted.forEach(function(id){var card=state.cards[id];if(!card||!matches(card))return;shown++;
+      var tr=document.createElement("tr");
+      var td=document.createElement("td");
+      var wrap=document.createElement("div");wrap.className="cmpcard";
+      var im=thumb(card);if(im)wrap.appendChild(im);
+      var info=document.createElement("div");
+      var cn=document.createElement("div");cn.className="cn";cn.textContent=card.name;
+      var cnum=document.createElement("div");cnum.className="cnum";cnum.textContent="#"+(card.num||"—");
+      info.appendChild(cn);info.appendChild(cnum);wrap.appendChild(info);td.appendChild(wrap);tr.appendChild(td);
+      pids.forEach(function(pid){var c=document.createElement("td");
+        c.className="pcell"+(pid===state.activeProfile?" active-col":"");
+        var g=state.profiles[pid].grades[id];
+        if(g){var b=document.createElement("span");b.className="cbadge";b.textContent=g;b.style.background=gradeColor(g);c.appendChild(b);}
+        else{var dash=document.createElement("span");dash.className="cdash";dash.textContent="—";c.appendChild(dash);}
+        tr.appendChild(c);});
+      tr.addEventListener("click",function(e){e.stopPropagation();openMenu(card,td);}); // edits active profile
+      body.appendChild(tr);
+    });
+    if(!shown){var tr=document.createElement("tr"),td=document.createElement("td");
+      td.colSpan=pids.length+1;td.style.padding="20px";td.style.color="var(--muted)";
+      td.textContent=order.length?"Niciun card nu se potrivește filtrelor.":"Nu sunt carduri încărcate.";
+      tr.appendChild(td);body.appendChild(tr);}
+  }
+
+  function setView(v){
+    ui.view=v;
+    $("#viewCards").classList.toggle("hidden",v!=="cards");
+    $("#viewCompare").classList.toggle("hidden",v!=="compare");
+    document.querySelectorAll("#tabs .tab").forEach(function(b){b.classList.toggle("on",b.dataset.view===v);});
+    if(v==="compare")renderCompare();else renderCards();
+  }
+  function refreshViews(){if(ui.view==="compare")renderCompare();else renderCards();}
+  function renderAll(){renderProfiles();renderCards();renderCompare();}
+
+  function setGrade(id,g){gSet(id,g);save();refreshViews();syncMenu();}
+
+  // ---------- card menu ----------
+  var menuCard=null;
+  (function buildGradeBtns(){
+    elGradeBtns.innerHTML="";
+    GRADES.forEach(function(gr){
+      var row=document.createElement("div");row.className="grow";
+      var lab=document.createElement("span");lab.className="glabel m"+gr.l;lab.textContent=gr.l;
+      var desc=document.createElement("span");desc.className="gdesc";desc.textContent=gr.d;
+      var pm=document.createElement("span");pm.className="gpm";
+      [["-","−"],["",gr.l],["+","+"]].forEach(function(p){
+        var b=document.createElement("button");b.dataset.grade=gr.l+p[0];b.textContent=p[1];
+        b.title=gr.l+(p[0]||"")+" — "+gr.d;pm.appendChild(b);});
+      row.appendChild(lab);row.appendChild(desc);row.appendChild(pm);
+      elGradeBtns.appendChild(row);
+    });
+  })();
+  function openMenu(card,anchor){
+    menuCard=card;elMenuTitle.textContent=card.name;elMenu.classList.add("open");syncMenu();
+    var r=anchor.getBoundingClientRect(),mw=320,mh=elMenu.offsetHeight||240;
+    var left=r.right+8,top=r.top;
+    if(left+mw>window.innerWidth-8)left=Math.max(8,r.left-mw-8);
+    if(top+mh>window.innerHeight-8)top=Math.max(8,window.innerHeight-mh-8);
+    elMenu.style.left=left+"px";elMenu.style.top=top+"px";
+  }
+  function syncMenu(){
+    if(!menuCard)return;var g=gAct(menuCard.id);
+    if(elMenuTitle&&curProfile())elMenuTitle.textContent=menuCard.name+" · "+curProfile().name;
+    elGradeBtns.querySelectorAll("button").forEach(function(b){b.classList.toggle("act",b.dataset.grade===g);});
+  }
+  function closeMenu(){elMenu.classList.remove("open");menuCard=null;}
+  elMenu.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b||!menuCard)return;
+    if(b.hasAttribute("data-grade"))setGrade(menuCard.id,b.dataset.grade);
+    else if(b.dataset.act==="ungrade")setGrade(menuCard.id,"");
+  });
+  document.addEventListener("click",function(e){if(elMenu.classList.contains("open")&&!elMenu.contains(e.target))closeMenu();});
+  document.addEventListener("keydown",function(e){
+    if(e.key==="Escape"){closeMenu();return;}
+    if(!menuCard)return;
+    if(/^[sabcdeSABCDE]$/.test(e.key)){setGrade(menuCard.id,e.key.toUpperCase());}
+    else if(e.key==="+"||e.key==="-"){var cur=gAct(menuCard.id);
+      if(cur)setGrade(menuCard.id,cur.charAt(0)+(e.key==="+"?"+":"-"));}
+  });
+  window.addEventListener("scroll",function(){if(elMenu.classList.contains("open"))closeMenu();},true);
+
+  // ---------- export / import ----------
+  function loadJSZip(){
+    if(window.JSZip)return Promise.resolve(window.JSZip);
+    return new Promise(function(res,rej){
+      var s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+      s.onload=function(){res(window.JSZip);};s.onerror=function(){rej(new Error("JSZip indisponibil (offline?)"));};
+      document.head.appendChild(s);
+    });
+  }
+  function dataPayload(){return {version:3,set:SET,cards:state.cards,profiles:state.profiles,activeProfile:state.activeProfile,updatedAt:state.updatedAt||Date.now()};}
+  function download(blob,name){var url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);}
+  function stamp(){var d=new Date();function p(n){return(n<10?"0":"")+n;}return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+
+  function exportJson(){save();download(new Blob([JSON.stringify(dataPayload(),null,2)],{type:"application/json"}),
+    "marvel-super-heroes-tierlist-"+stamp()+".json");toast("Date exportate (.json)");}
+
+  function buildPackagedHTML(){
+    var elCH=$("#cmpHead"),elCB=$("#cmpBody");
+    var gH=elGallery.innerHTML,sH=elStatus.innerHTML,chH=elCH?elCH.innerHTML:"",cbH=elCB?elCB.innerHTML:"";
+    elGallery.innerHTML="";elStatus.innerHTML="";if(elCH)elCH.innerHTML="";if(elCB)elCB.innerHTML="";
+    var doc="<!DOCTYPE html>\n"+document.documentElement.outerHTML;
+    elGallery.innerHTML=gH;elStatus.innerHTML=sH;if(elCH)elCH.innerHTML=chH;if(elCB)elCB.innerHTML=cbH;
+    var payload={state:dataPayload(),imgBase:"cards/"};
+    var json=JSON.stringify(payload).replace(/</g,"\\u003c");
+    var dataScript="<script>window.__PACKAGED_DATA__="+json+";<\/script>\n";
+    doc=doc.replace('<script id="appcode">',dataScript+'<script id="appcode">');
+    return doc;
+  }
+
+  function exportPackage(){
+    var btn=$("#btnExport");btn.disabled=true;
+    var JSZipRef=null;
+    showStatus('<div class="banner"><div class="msg"><b>Pregătesc pachetul…</b> descarc imaginile cardurilor. '+
+      '<span id="soN"></span></div><div style="width:100%"><div class="progress"><div id="pbar"></div></div></div></div>');
+    loadJSZip().then(function(z){JSZipRef=z;
+      return ensureImagesCached(function(d,t){var pb=document.getElementById("pbar");
+        if(pb)pb.style.width=(t?Math.round(d/t*100):100)+"%";
+        var s=document.getElementById("soN");if(s)s.textContent=d+" / "+t;});
+    }).then(function(){
+      var zip=new JSZipRef();
+      zip.file("tierlist.json",JSON.stringify(dataPayload(),null,2));
+      zip.file("index.html",buildPackagedHTML());
+      zip.file("CITESTE-MA.txt",
+        "Marvel Super Heroes - Tier List (pachet offline)\n\n"+
+        "1. Dezarhiveaza acest folder oriunde vrei.\n"+
+        "2. Deschide index.html cu dublu-click (in browser).\n"+
+        "3. Functioneaza complet offline; imaginile sunt in folderul cards/.\n\n"+
+        "Pentru a-l muta pe alt calculator, copiaza tot folderul.\n");
+      var folder=zip.folder("cards"),added=0,missing=0;
+      order.forEach(function(id){if(imgBlobs[id]){folder.file(id+".jpg",imgBlobs[id]);added++;}else missing++;});
+      return zip.generateAsync({type:"blob"},function(meta){
+        var pb=document.getElementById("pbar");if(pb)pb.style.width=Math.round(meta.percent)+"%";
+      }).then(function(blob){
+        download(blob,"marvel-super-heroes-tierlist-"+stamp()+".zip");
+        clearStatus();btn.disabled=false;
+        var msg=added+" carduri în pachet"+(missing?(" · "+missing+" fără imagine"):"");
+        showStatus('<div class="banner ok"><div class="msg"><b>Pachet creat.</b> '+msg+
+          '. Dezarhivează-l și deschide <b>index.html</b> — e folderul aplicației cu imaginile salvate în <b>cards/</b>.</div></div>');
+        toast("Pachet .zip descărcat");
+      });
+    }).catch(function(err){
+      clearStatus();btn.disabled=false;
+      showStatus('<div class="banner err"><div class="msg"><b>Nu am putut crea pachetul .zip.</b> '+escapeHtml(err.message||"")+
+        ' Poți folosi în schimb „Exportă doar datele (.json)" din subsol.</div></div>');
+    });
+  }
+
+  function importFile(file){
+    var name=(file.name||"").toLowerCase();
+    if(name.indexOf(".zip")>=0){
+      loadJSZip().then(function(z){return z.loadAsync(file);}).then(function(zip){
+        var jf=zip.file("tierlist.json")||zip.file("data.json");
+        if(!jf)throw new Error("Pachetul nu conține tierlist.json");
+        return jf.async("string").then(function(txt){
+          applyData(JSON.parse(txt));
+          var imgFiles=[];zip.folder("cards").forEach(function(p,f){if(!f.dir)imgFiles.push(f);});
+          if(!imgFiles.length)return;
+          return idbOpen().then(function(db){
+            return imgFiles.reduce(function(ch,f){return ch.then(function(){
+              var id=f.name.split("/").pop().replace(/\.jpg$/i,"");
+              return f.async("blob").then(function(blob){adoptBlob(id,blob);return idbPut(db,id,blob);});
+            });},Promise.resolve());
+          });
+        }).then(function(){renderAll();toast("Pachet importat ("+order.length+" carduri)");});
+      }).catch(function(err){toast("Import eșuat: "+(err.message||err));});
+    } else {
+      var reader=new FileReader();
+      reader.onload=function(){try{applyData(JSON.parse(reader.result));renderAll();
+        toast("Date importate ("+order.length+" carduri)");}catch(err){toast("Import eșuat: "+err.message);}};
+      reader.readAsText(file);
+    }
+  }
+  function applyData(o){
+    if(!o||typeof o!=="object"||!o.cards)throw new Error("Fișier nevalid (lipsesc cardurile).");
+    state=Object.assign({version:3,set:SET},o);
+    ensureProfiles();
+    rebuildOrder();save();
+  }
+
+  // ---------- import from 17Lands (GIH win-rate -> letter grade) ----------
+  // z-score thresholds (best -> worst); a card's win rate is graded relative to the set average.
+  var Z17=[["S+",2.0],["S",1.7],["S-",1.4],["A+",1.1],["A",0.9],["A-",0.7],
+    ["B+",0.5],["B",0.35],["B-",0.2],["C+",0.07],["C",-0.07],["C-",-0.2],
+    ["D+",-0.4],["D",-0.6],["D-",-0.9],["E+",-1.2],["E",-1.6],["E-",-Infinity]];
+  function gradeForZ(z){for(var i=0;i<Z17.length;i++){if(z>=Z17[i][1])return Z17[i][0];}return "E-";}
+  function loose(s){return String(s||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+  function buildNameIndex(){
+    var idx={};
+    order.forEach(function(id){var c=state.cards[id];if(!c)return;
+      idx[loose(c.name)]=id;                                   // full name
+      var front=c.name.split("//")[0];                          // front face of DFCs
+      if(front&&!idx[loose(front)])idx[loose(front)]=id;});
+    return idx;
+  }
+  // map a 17Lands tier-list grade onto our scale (we have S..E, no F -> F becomes E)
+  function map17Tier(t){if(!t)return "";t=String(t).trim().toUpperCase();
+    if(t==="TBD"||t==="SB"||t==="NA"||t==="")return "";
+    t=t.replace(/^F/,"E");return isValidGrade(t)?t:"";}
+  function err17(err){var btn=$("#btn17l");if(btn)btn.disabled=false;clearStatus();
+    showStatus('<div class="banner err"><div class="msg"><b>Nu am putut lua datele de la 17Lands.</b> '+escapeHtml(err.message||"")+
+      ' Verifică internetul și linkul. Ai nevoie de internet pentru acest import.</div></div>');}
+  function import17Lands(){
+    var def="https://www.17lands.com/card_ratings?expansion="+SET.toUpperCase()+"&format=PremierDraft";
+    var url=prompt("Lipește un link 17Lands — un tier list (.../tier_list/...) sau pagina Card Ratings:",def);
+    if(url===null)return;
+    var btn=$("#btn17l");btn.disabled=true;
+    // (1) shared tier list with manual grades?
+    var m=url.match(/tier_list\/([0-9a-fA-F]{8,})/)||url.match(/card_tiers\/[^?#]*\/([0-9a-fA-F]{8,})/);
+    if(m){
+      showStatus('<div class="banner"><div class="msg"><b>Iau tier list-ul de la 17Lands…</b></div></div>');
+      fetch("https://www.17lands.com/data/tier_list/"+m[1],{headers:{"Accept":"application/json"}})
+        .then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+        .then(applyTierList).catch(err17);
+      return;
+    }
+    // (2) otherwise: Card Ratings (GIH win rate)
+    var exp=SET.toUpperCase(),fmt="PremierDraft",sd="",ed="";
+    try{var qs=(url.split("?")[1]||"").split("#")[0];qs.split("&").forEach(function(kv){var p=kv.split("="),k=p[0],v=decodeURIComponent((p[1]||"").replace(/\+/g," "));
+      if(k==="expansion"&&v)exp=v.toUpperCase();else if(k==="format"&&v)fmt=v;else if(k==="start_date")sd=v;else if(k==="end_date")ed=v;});}catch(e){}
+    var api="https://www.17lands.com/card_ratings/data?expansion="+encodeURIComponent(exp)+"&format="+encodeURIComponent(fmt);
+    if(sd)api+="&start_date="+encodeURIComponent(sd);if(ed)api+="&end_date="+encodeURIComponent(ed);
+    showStatus('<div class="banner"><div class="msg"><b>Iau datele de la 17Lands…</b> ('+escapeHtml(exp)+" · "+escapeHtml(fmt)+')</div></div>');
+    fetch(api,{headers:{"Accept":"application/json"}}).then(function(r){if(!r.ok)throw new Error("HTTP "+r.status);return r.json();})
+      .then(function(data){applyRatings(data,exp,fmt);}).catch(err17);
+  }
+  // write a name->grade map into a dedicated profile and activate it
+  function importIntoProfile(pname,grades,matched,unmatched,note){
+    var pid=null;Object.keys(state.profiles).forEach(function(k){if(state.profiles[k].name===pname)pid=k;});
+    if(!pid){pid=newPid();state.profiles[pid]={id:pid,name:pname,grades:{}};}
+    state.profiles[pid].grades=grades;state.activeProfile=pid;
+    save();renderProfiles();refreshViews();clearStatus();
+    var msg=matched+" note importate în profilul „"+pname+"”";if(unmatched)msg+=" · "+unmatched+" necorelate";
+    showStatus('<div class="banner ok"><div class="msg"><b>Gata.</b> '+escapeHtml(msg)+". "+(note||"")+
+      ' Le poți ajusta manual oricând.</div></div>');
+    toast(matched+" note din 17Lands");
+  }
+  function applyTierList(d){
+    var btn=$("#btn17l");if(btn)btn.disabled=false;
+    var ratings=d&&d.ratings;
+    if(!ratings||!ratings.length){clearStatus();
+      showStatus('<div class="banner err"><div class="msg"><b>Tier list-ul nu conține carduri.</b></div></div>');return;}
+    var idx=buildNameIndex(),grades={},matched=0,unmatched=0;
+    ratings.forEach(function(c){var g=map17Tier(c.tier);if(!g)return; // TBD / fără notă -> sărim
+      var id=idx[loose(c.name)]||idx[loose((c.name||"").split("//")[0])];
+      if(!id){unmatched++;return;}grades[id]=g;matched++;});
+    if(!matched){clearStatus();
+      showStatus('<div class="banner err"><div class="msg"><b>Tier list-ul n-are note pentru cardurile din acest set</b> (poate sunt toate „TBD").</div></div>');return;}
+    importIntoProfile("17L: "+(d.name||"tier list"),grades,matched,unmatched,"Notele vin direct din tier list-ul de pe 17Lands (F→E).");
+  }
+  function applyRatings(data,exp,fmt){
+    var btn=$("#btn17l");btn.disabled=false;
+    if(!data||!data.length){clearStatus();showStatus('<div class="banner err"><div class="msg"><b>17Lands n-a întors carduri</b> pentru '+escapeHtml(exp)+".</div></div>");return;}
+    // keep only cards that actually have game data
+    function rated(min){return data.filter(function(c){return typeof c.ever_drawn_win_rate==="number"&&c.ever_drawn_game_count>=min;});}
+    var r=rated(200);if(r.length<10)r=rated(1);
+    if(!r.length){clearStatus();
+      showStatus('<div class="banner err"><div class="msg"><b>17Lands nu are încă date de joc pentru acest set/format.</b> '+
+        'Setul e prea nou sau formatul „'+escapeHtml(fmt)+'" n-are jocuri. Încearcă din nou mai târziu sau alege alt format pe 17Lands.</div></div>');return;}
+    var wrs=r.map(function(c){return c.ever_drawn_win_rate;});
+    var mu=wrs.reduce(function(a,b){return a+b;},0)/wrs.length;
+    var sd=Math.sqrt(wrs.reduce(function(a,b){return a+(b-mu)*(b-mu);},0)/wrs.length)||1e-9;
+    var idx=buildNameIndex(),grades={},matched=0,unmatched=0;
+    r.forEach(function(c){var id=idx[loose(c.name)]||idx[loose((c.name||"").split("//")[0])];
+      if(!id){unmatched++;return;}
+      grades[id]=gradeForZ((c.ever_drawn_win_rate-mu)/sd);matched++;});
+    importIntoProfile("17Lands · "+fmt,grades,matched,unmatched,"Notele vin din GIH Win Rate (calibrat pe media setului).");
+  }
+
+  // ---------- Google Drive sync (drive.appdata) ----------
+  var GD_CLIENT_KEY="msh-gdrive-client",GD_AUTO_KEY="msh-gdrive-auto",GD_FILE="msh-tierlist.json";
+  var gConnected=false,gTokenClient=null,gToken=null,gTokenExp=0,gTokenQueue=[],gFileId=null,gPushTimer=null;
+  function gClientId(){try{return localStorage.getItem(GD_CLIENT_KEY)||"";}catch(e){return "";}}
+  function gSetClientId(v){try{if(v)localStorage.setItem(GD_CLIENT_KEY,v);else localStorage.removeItem(GD_CLIENT_KEY);}catch(e){}}
+  function cloudStatus(msg,err){var s=$("#cloudStatus");if(s){s.textContent=msg||"";s.className="cstatus"+(err?" err":"");}}
+  function updateCloudUI(){
+    var ci=$("#cloudClient");if(ci&&!ci.value)ci.value=gClientId();
+    var c=$("#btnCloudConnect"),d=$("#btnCloudDisc"),sy=$("#btnCloudSync"),dot=$("#cloudDot");
+    if(c)c.classList.toggle("hidden",gConnected);
+    if(d)d.classList.toggle("hidden",!gConnected);
+    if(sy)sy.disabled=!gConnected;
+    if(dot)dot.className="cdot"+(gConnected?" on":"");
+  }
+  function loadGIS(){
+    if(window.google&&google.accounts&&google.accounts.oauth2)return Promise.resolve();
+    return new Promise(function(res,rej){var s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";
+      s.onload=function(){res();};s.onerror=function(){rej(new Error("Nu s-a putut încărca Google (offline?)"));};document.head.appendChild(s);});
+  }
+  function initToken(){
+    if(gTokenClient)return true;
+    if(!(window.google&&google.accounts&&google.accounts.oauth2))return false;
+    var cid=gClientId();if(!cid)return false;
+    gTokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,
+      scope:"https://www.googleapis.com/auth/drive.appdata",
+      callback:function(resp){
+        if(resp&&resp.access_token){gToken=resp.access_token;gTokenExp=Date.now()+((resp.expires_in||3600)*1000)-60000;
+          gTokenQueue.forEach(function(q){q.res(gToken);});}
+        else{var er=new Error((resp&&resp.error)||"Autentificare eșuată");gTokenQueue.forEach(function(q){q.rej(er);});}
+        gTokenQueue=[];},
+      error_callback:function(e){gTokenQueue.forEach(function(q){q.rej(new Error((e&&e.type)||"Autentificare anulată"));});gTokenQueue=[];}
+    });
+    return true;
+  }
+  function getToken(interactive){
+    return new Promise(function(res,rej){
+      if(gToken&&Date.now()<gTokenExp)return res(gToken);
+      if(!initToken())return rej(new Error("Lipsește Client ID sau Google nu s-a încărcat"));
+      gTokenQueue.push({res:res,rej:rej});
+      try{gTokenClient.requestAccessToken({prompt:interactive?"":"none"});}catch(e){rej(e);}
+    });
+  }
+  function gjson(r){if(!r.ok)return r.text().then(function(t){throw new Error("Drive "+r.status+" "+String(t).slice(0,120));});return r.json();}
+  function driveFind(t){return fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id)&q="+
+    encodeURIComponent("name='"+GD_FILE+"'"),{headers:{Authorization:"Bearer "+t}}).then(gjson).then(function(d){return (d.files&&d.files[0])||null;});}
+  function driveDownload(t,id){return fetch("https://www.googleapis.com/drive/v3/files/"+id+"?alt=media",
+    {headers:{Authorization:"Bearer "+t}}).then(gjson);}
+  function driveCreate(t,obj){var b="msh"+Date.now();
+    var body="--"+b+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify({name:GD_FILE,parents:["appDataFolder"]})+
+      "\r\n--"+b+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify(obj)+"\r\n--"+b+"--";
+    return fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+      {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"multipart/related; boundary="+b},body:body}).then(gjson).then(function(d){return d.id;});}
+  function driveUpdate(t,id,obj){return fetch("https://www.googleapis.com/upload/drive/v3/files/"+id+"?uploadType=media",
+    {method:"PATCH",headers:{Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify(obj)}).then(gjson);}
+  function drivePush(){return getToken(false).then(function(t){var payload=dataPayload();
+    if(gFileId)return driveUpdate(t,gFileId,payload);
+    return driveFind(t).then(function(f){if(f){gFileId=f.id;return driveUpdate(t,f.id,payload);}
+      return driveCreate(t,payload).then(function(id){gFileId=id;});});});}
+  function drivePull(){return getToken(false).then(function(t){return driveFind(t).then(function(f){
+    if(!f)return {none:true};gFileId=f.id;
+    return driveDownload(t,f.id).then(function(remote){
+      if(remote&&remote.cards&&(remote.updatedAt||0)>(state.updatedAt||0)){
+        applyData(remote);state.updatedAt=remote.updatedAt||state.updatedAt;save(true);renderAll();return {pulled:true};}
+      return {pulled:false};});});});}
+  function scheduleCloudPush(){if(!gConnected)return;clearTimeout(gPushTimer);
+    gPushTimer=setTimeout(function(){drivePush().then(function(){cloudStatus("Salvat în Drive ✓");})
+      .catch(function(e){cloudStatus("Sync eșuat: "+(e.message||e),true);});},1500);}
+  function cloudConnect(interactive){
+    if(!gClientId()){cloudStatus("Întâi pune Client ID-ul Google (vezi pașii de mai jos).",true);var ci=$("#cloudClient");if(ci)ci.focus();return;}
+    cloudStatus("Conectare la Google Drive…");
+    loadGIS().then(function(){return getToken(interactive!==false);}).then(function(){
+      cloudStatus("Sincronizez…");
+      return drivePull().then(function(r){return drivePush().then(function(){
+        gConnected=true;try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
+        cloudStatus(r.pulled?"Conectat · date aduse din Drive ✓":(r.none?"Conectat · creat fișier nou în Drive ✓":"Conectat · date trimise în Drive ✓"));
+        toast("Google Drive conectat");});});
+    }).catch(function(e){gConnected=false;updateCloudUI();cloudStatus("Eroare: "+(e.message||e),true);});
+  }
+  function cloudSyncNow(){if(!gConnected)return;cloudStatus("Sincronizez…");
+    drivePull().then(function(r){return drivePush().then(function(){cloudStatus(r.pulled?"Adus din Drive ✓":"Trimis în Drive ✓");});})
+      .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);});}
+  function cloudDisconnect(){var tk=gToken;gConnected=false;gToken=null;gTokenExp=0;
+    try{localStorage.removeItem(GD_AUTO_KEY);}catch(e){}
+    try{if(tk&&window.google&&google.accounts&&google.accounts.oauth2&&google.accounts.oauth2.revoke)google.accounts.oauth2.revoke(tk);}catch(e){}
+    updateCloudUI();cloudStatus("Deconectat. Datele locale rămân pe acest calculator.");}
+
+  // ---------- controls ----------
+  $("#btnSaveOffline").addEventListener("click",saveOfflineFlow);
+  $("#btnExport").addEventListener("click",exportPackage);
+  $("#btnExportJson").addEventListener("click",exportJson);
+  $("#btnImport").addEventListener("click",function(){elFile.value="";elFile.click();});
+  $("#btn17l").addEventListener("click",import17Lands);
+  $("#btnHelp").addEventListener("click",function(){var h=$("#help");h.classList.toggle("hidden");
+    if(!h.classList.contains("hidden"))h.scrollIntoView({behavior:"smooth",block:"nearest"});});
+  $("#btnHelpClose").addEventListener("click",function(){$("#help").classList.add("hidden");});
+  $("#btnCloud").addEventListener("click",function(){var c=$("#cloud");c.classList.toggle("hidden");
+    if(!c.classList.contains("hidden")){updateCloudUI();c.scrollIntoView({behavior:"smooth",block:"nearest"});}});
+  $("#btnCloudClose").addEventListener("click",function(){$("#cloud").classList.add("hidden");});
+  $("#btnCloudSaveId").addEventListener("click",function(){var v=$("#cloudClient").value.trim();gSetClientId(v);
+    cloudStatus(v?"Client ID salvat. Acum apasă „Conectează Drive".":"Client ID șters.");});
+  $("#btnCloudConnect").addEventListener("click",function(){cloudConnect(true);});
+  $("#btnCloudSync").addEventListener("click",cloudSyncNow);
+  $("#btnCloudDisc").addEventListener("click",cloudDisconnect);
+  elFile.addEventListener("change",function(){if(elFile.files[0])importFile(elFile.files[0]);});
+  $("#btnReload").addEventListener("click",function(){fetchCards().then(renderAll).catch(loadFailed);});
+  $("#btnReset").addEventListener("click",function(){
+    var p=curProfile();if(!p)return;
+    if(!confirm('Golești toate notele din profilul "'+p.name+'"? Cardurile rămân.'))return;
+    p.grades={};save();refreshViews();toast("Resetat");});
+
+  // ---- profiles & tabs ----
+  function addProfile(){
+    var name=prompt("Nume profil nou:","Profil "+(Object.keys(state.profiles).length+1));
+    if(name===null)return;name=(name.trim().slice(0,30))||"Profil";
+    var pid=newPid();state.profiles[pid]={id:pid,name:name,grades:{}};
+    state.activeProfile=pid;save();renderProfiles();refreshViews();toast("Profil creat: "+name);
+  }
+  function renameProfile(){
+    var p=curProfile();if(!p)return;var name=prompt("Nume profil:",p.name);if(name===null)return;
+    p.name=(name.trim().slice(0,30))||p.name;save();renderProfiles();refreshViews();toast("Redenumit");
+  }
+  function deleteProfile(){
+    if(Object.keys(state.profiles).length<=1){toast("Trebuie să rămână cel puțin un profil.");return;}
+    var p=curProfile();if(!p)return;
+    if(!confirm('Ștergi profilul "'+p.name+'" și toate notele lui?'))return;
+    delete state.profiles[state.activeProfile];
+    state.activeProfile=Object.keys(state.profiles)[0];
+    save();renderProfiles();refreshViews();toast("Profil șters");
+  }
+  $("#profileSel").addEventListener("change",function(){
+    if(state.profiles[this.value]){state.activeProfile=this.value;save();refreshViews();}});
+  $("#btnProfAdd").addEventListener("click",addProfile);
+  $("#btnProfRename").addEventListener("click",renameProfile);
+  $("#btnProfDel").addEventListener("click",deleteProfile);
+  document.querySelectorAll("#tabs .tab").forEach(function(b){
+    b.addEventListener("click",function(){setView(b.dataset.view);});});
+
+  elSearch.addEventListener("input",function(){ui.q=elSearch.value.trim().toLowerCase();refreshViews();});
+  elRarity.addEventListener("change",function(){ui.rarity=elRarity.value;refreshViews();});
+  elSort.addEventListener("change",function(){ui.sort=elSort.value;refreshViews();});
+  elDir.addEventListener("click",function(){ui.dir=-ui.dir;elDir.textContent=ui.dir>0?"↑":"↓";refreshViews();});
+  document.querySelectorAll("#colorFilters .pip").forEach(function(p){p.addEventListener("click",function(){
+    var c=p.dataset.c;ui.colors[c]=!ui.colors[c];p.classList.toggle("on",!!ui.colors[c]);refreshViews();});});
+  document.querySelectorAll("#sizes button").forEach(function(b){b.addEventListener("click",function(){
+    document.querySelectorAll("#sizes button").forEach(function(x){x.classList.remove("on");});
+    b.classList.add("on");ui.size=b.dataset.s;elBoard.className="sz-"+ui.size;});});
+
+  // ---------- boot ----------
+  function boot(){
+    if(PACKAGED&&PACKAGED.state){
+      state=Object.assign(state,PACKAGED.state);
+      ensureProfiles();
+      rebuildOrder();renderAll();
+      // hide online-only buttons in packaged offline mode
+      var sb=$("#btnSaveOffline");if(sb)sb.classList.add("hidden");
+      var rl=$("#btnReload");if(rl)rl.classList.add("hidden");
+      var l17=$("#btn17l");if(l17)l17.classList.add("hidden");
+      var cb=$("#btnCloud");if(cb)cb.classList.add("hidden");
+      return;
+    }
+    var had=load();
+    if(!had)ensureProfiles();
+    loadCachedImages().then(function(){
+      renderProfiles();
+      if(had){renderCards();
+        if(!STORAGE_OK)showStatus('<div class="banner"><div class="msg"><b>Notă:</b> mediu fără salvare locală. '+
+          'Descarcă fișierul și deschide-l în browser ca să se salveze automat.</div></div>');
+      } else {fetchCards().then(renderAll).catch(loadFailed);}
+    });
+    // auto-reconnect Google Drive if it was connected before
+    try{if(gClientId()&&localStorage.getItem(GD_AUTO_KEY))setTimeout(function(){cloudConnect(false);},900);}catch(e){}
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
