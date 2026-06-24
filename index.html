@@ -368,6 +368,7 @@
       state.activeProfile=Object.keys(state.profiles)[0];
     Object.keys(state.profiles).forEach(function(pid){
       var p=state.profiles[pid];if(!p.grades)p.grades={};if(!p.name)p.name=pid;p.id=pid;
+      if(typeof p.updatedAt!=="number")p.updatedAt=0;
       Object.keys(p.grades).forEach(function(id){if(!isValidGrade(p.grades[id]))delete p.grades[id];});
     });
     delete state.grades;delete state.placements;delete state.tiers; // migrated / unused
@@ -375,7 +376,7 @@
   }
   function curProfile(){return state.profiles[state.activeProfile];}
   function gAct(id){var p=curProfile();return p&&p.grades?p.grades[id]:undefined;}
-  function gSet(id,g){var p=curProfile();if(!p)return;if(g)p.grades[id]=g;else delete p.grades[id];}
+  function gSet(id,g){var p=curProfile();if(!p)return;if(g)p.grades[id]=g;else delete p.grades[id];p.updatedAt=Date.now();}
 
   var PACKAGED = (typeof window!=="undefined" && window.__PACKAGED_DATA__) ? window.__PACKAGED_DATA__ : null;
   var IMG_BASE = PACKAGED && PACKAGED.imgBase ? PACKAGED.imgBase : "";
@@ -857,7 +858,7 @@
   function importIntoProfile(pname,grades,matched,unmatched,note){
     var pid=null;Object.keys(state.profiles).forEach(function(k){if(state.profiles[k].name===pname)pid=k;});
     if(!pid){pid=newPid();state.profiles[pid]={id:pid,name:pname,grades:{}};}
-    state.profiles[pid].grades=grades;state.activeProfile=pid;
+    state.profiles[pid].grades=grades;state.profiles[pid].updatedAt=Date.now();state.activeProfile=pid;
     save();renderProfiles();refreshViews();clearStatus();
     var msg=matched+" note importate în profilul „"+pname+"”";if(unmatched)msg+=" · "+unmatched+" necorelate";
     showStatus('<div class="banner ok"><div class="msg"><b>Gata.</b> '+escapeHtml(msg)+". "+(note||"")+
@@ -994,10 +995,33 @@
       {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"multipart/related; boundary="+b},body:body}).then(gjson).then(function(d){return d.id;});}
   function driveMakeLinkEditable(t,id){return fetch("https://www.googleapis.com/drive/v3/files/"+id+"/permissions",
     {method:"POST",headers:{Authorization:"Bearer "+t,"Content-Type":"application/json"},body:JSON.stringify({role:"writer",type:"anyone"})}).then(gjson);}
-  function applyRemote(remote){
-    if(remote&&remote.cards&&(remote.updatedAt||0)>(state.updatedAt||0)){
-      applyData(remote);state.updatedAt=remote.updatedAt||state.updatedAt;save(true);renderAll();return {pulled:true};}
-    return {pulled:false};}
+  // scrie în localStorage fără a declanșa un push (folosit în timpul sync-ului)
+  function persistLocal(){try{if(STORAGE_OK)localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){}}
+  // reuniune de profile: păstrează toate (din ambele); pe conflict câștigă profilul mai recent, notele se unesc (nu se șterg)
+  function mergeProfiles(L,R){
+    var out={},ids={};L=L||{};R=R||{};
+    Object.keys(L).forEach(function(id){ids[id]=1;});Object.keys(R).forEach(function(id){ids[id]=1;});
+    Object.keys(ids).forEach(function(id){
+      var a=L[id],b=R[id];
+      if(a&&!b){out[id]=a;return;}
+      if(b&&!a){out[id]=b;return;}
+      var aT=a.updatedAt||0,bT=b.updatedAt||0,newer=aT>=bT?a:b,older=aT>=bT?b:a;
+      var g={};
+      Object.keys(older.grades||{}).forEach(function(k){g[k]=older.grades[k];});
+      Object.keys(newer.grades||{}).forEach(function(k){g[k]=newer.grades[k];}); // newer câștigă pe conflict
+      out[id]={id:id,name:newer.name||older.name||id,grades:g,updatedAt:Math.max(aT,bT)};
+    });
+    return out;
+  }
+  // unește datele de pe Drive în starea locală, fără a pierde nimic; întoarce true dacă s-a schimbat ceva
+  function mergeRemote(remote){
+    if(!remote||typeof remote!=="object")return false;
+    var before=JSON.stringify(state.profiles||{})+"|"+Object.keys(state.cards||{}).length;
+    if(remote.profiles)state.profiles=mergeProfiles(state.profiles,remote.profiles);
+    if(remote.cards)Object.keys(remote.cards).forEach(function(id){if(!state.cards[id])state.cards[id]=remote.cards[id];});
+    ensureProfiles();rebuildOrder();
+    return before!==JSON.stringify(state.profiles||{})+"|"+Object.keys(state.cards||{}).length;
+  }
   // are aplicația deja acces (drive.file) la fișierul partajat?
   function driveCheck(t,id){if(!id)return Promise.resolve(false);
     return fetch("https://www.googleapis.com/drive/v3/files/"+id+"?fields=id",{headers:{Authorization:"Bearer "+t}})
@@ -1043,18 +1067,28 @@
     return driveCheck(t,gSharedId()).then(function(ok){if(ok)return;
       cloudStatus("Alege fișierul partajat din dialog…");return pickFile(t).then(function(){});});
   }
-  function drivePush(){return getToken(false).then(function(t){var payload=dataPayload();
-    if(gMode()==="shared"){var sid=gSharedId();if(!sid)throw new Error("Lipsește File ID-ul partajat");return driveUpdate(t,sid,payload);}
-    if(gFileId)return driveUpdate(t,gFileId,payload);
-    return driveFind(t).then(function(f){if(f){gFileId=f.id;return driveUpdate(t,f.id,payload);}
-      return driveCreate(t,payload).then(function(id){gFileId=id;});});});}
-  function drivePull(){return getToken(false).then(function(t){
-    if(gMode()==="shared"){var sid=gSharedId();if(!sid)return {none:true};
-      return driveDownload(t,sid).then(applyRemote);}
-    return driveFind(t).then(function(f){if(!f)return {none:true};gFileId=f.id;
-      return driveDownload(t,f.id).then(applyRemote);});});}
+  // sincronizare prin MERGE: citește remote, îl unește în local (fără pierderi), apoi scrie uniunea înapoi
+  function cloudMergeSync(){
+    return getToken(false).then(function(t){
+      var getRemote;
+      if(gMode()==="shared"){var sid=gSharedId();if(!sid)return Promise.reject(new Error("Lipsește File ID-ul partajat"));
+        getRemote=driveDownload(t,sid).then(function(r){return {remote:r,id:sid};});
+      } else {
+        getRemote=driveFind(t).then(function(f){if(!f)return {remote:null,id:null};gFileId=f.id;
+          return driveDownload(t,f.id).then(function(r){return {remote:r,id:f.id};});});
+      }
+      return getRemote.then(function(o){
+        var changed=mergeRemote(o.remote);
+        if(changed){state.updatedAt=Date.now();persistLocal();renderAll();}
+        var payload=dataPayload();
+        if(gMode()==="shared")return driveUpdate(t,gSharedId(),payload).then(function(){return changed;});
+        if(o.id)return driveUpdate(t,o.id,payload).then(function(){return changed;});
+        return driveCreate(t,payload).then(function(id){gFileId=id;return changed;});
+      });
+    });
+  }
   function scheduleCloudPush(){if(!gConnected)return;clearTimeout(gPushTimer);
-    gPushTimer=setTimeout(function(){drivePush().then(function(){cloudStatus("Salvat în Drive ✓");})
+    gPushTimer=setTimeout(function(){cloudMergeSync().then(function(ch){cloudStatus(ch?"Sincronizat ✓":"Salvat în Drive ✓");})
       .catch(function(e){cloudStatus("Sync eșuat: "+(e.message||e),true);});},1500);}
   function cloudConnect(interactive){
     if(!gClientId()){cloudStatus("Întâi pune Client ID-ul Google (vezi pașii de mai jos).",true);var ci=$("#cloudClient");if(ci)ci.focus();return;}
@@ -1064,10 +1098,9 @@
       return ensureSharedAccess(t);
     }).then(function(){
       cloudStatus("Sincronizez…");
-      return drivePull().then(function(r){return drivePush().then(function(){
+      return cloudMergeSync().then(function(){
         gConnected=true;try{localStorage.setItem(GD_AUTO_KEY,"1");}catch(e){}updateCloudUI();
-        cloudStatus(r.pulled?"Conectat · date aduse din Drive ✓":(r.none?"Conectat · creat fișier nou în Drive ✓":"Conectat · date trimise în Drive ✓"));
-        toast("Google Drive conectat");});});
+        cloudStatus("Conectat · sincronizat ✓");toast("Google Drive sincronizat");});
     }).catch(function(e){gConnected=false;updateCloudUI();
       var m=(e&&e.message)||String(e);
       if(/40[34]/.test(m)&&gMode()==="shared")
@@ -1075,8 +1108,7 @@
       cloudStatus(m,true);toast("Drive: "+m);});
   }
   function cloudSyncNow(){if(!gConnected)return;cloudStatus("Sincronizez…");
-    return drivePull().then(function(r){return drivePush().then(function(){
-      cloudStatus(r.pulled?"Adus din Drive ✓":"Trimis în Drive ✓");toast(r.pulled?"Date aduse din Drive":"Date trimise în Drive");});})
+    return cloudMergeSync().then(function(ch){cloudStatus("Sincronizat ✓");toast(ch?"Sincronizat (unit cu Drive)":"Trimis în Drive");})
       .catch(function(e){cloudStatus("Eroare: "+(e.message||e),true);toast("Sync eșuat: "+(e.message||e));});}
   // butonul „Sync" din bară: conectează la nevoie, apoi pull+push (fără panou)
   function cloudSync(){
@@ -1096,12 +1128,12 @@
   function addProfile(){
     var name=prompt("Nume profil nou:","Profil "+(Object.keys(state.profiles).length+1));
     if(name===null)return;name=(name.trim().slice(0,30))||"Profil";
-    var pid=newPid();state.profiles[pid]={id:pid,name:name,grades:{}};
+    var pid=newPid();state.profiles[pid]={id:pid,name:name,grades:{},updatedAt:Date.now()};
     state.activeProfile=pid;save();renderProfiles();refreshViews();toast("Profil creat: "+name);
   }
   function renameProfile(){
     var p=curProfile();if(!p)return;var name=prompt("Nume profil:",p.name);if(name===null)return;
-    p.name=(name.trim().slice(0,30))||p.name;save();renderProfiles();refreshViews();toast("Redenumit");
+    p.name=(name.trim().slice(0,30))||p.name;p.updatedAt=Date.now();save();renderProfiles();refreshViews();toast("Redenumit");
   }
   function deleteProfile(){
     if(Object.keys(state.profiles).length<=1){toast("Trebuie să rămână cel puțin un profil.");return;}
